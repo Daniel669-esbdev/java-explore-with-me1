@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   stats-server:
     build: ./stats/stats-server
@@ -22,7 +21,7 @@ services:
       - POSTGRES_PASSWORD=practicum
 
   ewm-service:
-    build: ./server
+    build: ./Server
     container_name: ewm-service
     ports:
       - "8080:8080"
