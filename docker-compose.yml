@@ -29,8 +29,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=practicum
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:9090/health || exit 1"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 3s
       retries: 10
 
   ewm-db:
