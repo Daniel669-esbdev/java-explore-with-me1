@@ -138,8 +138,6 @@
 									</rule>
 								</rules>
 
-								<omitVisitors>FindReturnRef,StoredExternallyMutableObject</omitVisitors>
-
 							</configuration>
 
 						</execution>

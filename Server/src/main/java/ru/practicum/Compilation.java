@@ -21,7 +21,6 @@ import java.util.Set;
 @Table(name = "compilations")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class Compilation {
@@ -42,4 +41,19 @@ public class Compilation {
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
     private Set<Event> events;
+
+    public Compilation(Long id, Boolean pinned, String title, Set<Event> events) {
+        this.id = id;
+        this.pinned = pinned;
+        this.title = title;
+        this.events = (events == null) ? null : new java.util.HashSet<>(events);
+    }
+
+    public Set<Event> getEvents() {
+        return (events == null) ? null : new java.util.HashSet<>(events);
+    }
+
+    public void setEvents(Set<Event> events) {
+        this.events = (events == null) ? null : new java.util.HashSet<>(events);
+    }
 }
