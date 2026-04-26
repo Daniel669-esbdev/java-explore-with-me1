@@ -19,7 +19,11 @@ import java.util.Set;
 
 @Entity
 @Table(name = "compilations")
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor @Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Compilation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

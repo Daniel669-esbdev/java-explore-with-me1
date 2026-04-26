@@ -255,6 +255,7 @@ public class EventService {
                     .orElseThrow(() -> new NotFoundException("Category not found")));
         }
     }
+
     public List<ParticipationRequestDto> getRequestsByUserId(Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
