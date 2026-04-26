@@ -3,7 +3,9 @@ package ru.practicum.dto;
 import lombok.*;
 import ru.practicum.Location;
 import java.time.LocalDateTime;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 @Data
 @Builder
 @AllArgsConstructor

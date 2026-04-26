@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.exception.EventState;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -21,6 +22,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 @Entity
 @Table(name = "events")
 @Getter

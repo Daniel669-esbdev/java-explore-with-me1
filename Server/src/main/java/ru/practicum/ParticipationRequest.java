@@ -3,7 +3,9 @@ package ru.practicum;
 import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 @Entity
 @Table(name = "requests")
 @Getter

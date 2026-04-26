@@ -6,10 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.Location;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 @Data
 @Builder
 @AllArgsConstructor
