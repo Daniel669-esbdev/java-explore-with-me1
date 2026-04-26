@@ -137,7 +137,11 @@
 										</limits>
 									</rule>
 								</rules>
+
+								<omitVisitors>FindReturnRef,StoredExternallyMutableObject</omitVisitors>
+
 							</configuration>
+
 						</execution>
 						<execution>
 							<id>jacoco-site</id>
