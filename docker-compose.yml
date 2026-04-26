@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   stats-server:
-    build: ./api-gateway
+    build: ./stats/stats-server
     container_name: stats-server
     ports:
       - "9090:9090"
@@ -12,7 +12,6 @@ services:
       - SPRING_DATASOURCE_USERNAME=practicum
       - SPRING_DATASOURCE_PASSWORD=practicum
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - SPRING_SQL_INIT_MODE=always
 
   stats-db:
     image: postgres:14-alpine
@@ -23,7 +22,7 @@ services:
       - POSTGRES_PASSWORD=practicum
 
   ewm-service:
-    build: ./Server
+    build: ./server
     container_name: ewm-service
     ports:
       - "8080:8080"
