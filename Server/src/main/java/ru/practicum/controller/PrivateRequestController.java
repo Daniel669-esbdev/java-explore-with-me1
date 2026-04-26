@@ -6,6 +6,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.ParticipationRequestDto;
 import ru.practicum.service.EventService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -15,6 +17,8 @@ import java.util.List;
 @RequestMapping("/users/{userId}/requests")
 @RequiredArgsConstructor
 @Validated
+@SuppressFBWarnings("EI_EXPOSE_REP2")
+
 public class PrivateRequestController {
     private final EventService eventService;
 

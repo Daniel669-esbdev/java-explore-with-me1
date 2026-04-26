@@ -17,7 +17,8 @@ import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewEventDto;
 import ru.practicum.service.EventService;
 import ru.practicum.dto.*;
-import ru.practicum.service.EventService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 
 import ru.practicum.dto.*;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,6 +32,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @Validated
+@SuppressFBWarnings("EI_EXPOSE_REP2")
+
 public class EventPrivateController {
     private final EventService eventService;
 

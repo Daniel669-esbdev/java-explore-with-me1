@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.service.CategoryService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 
 import javax.validation.Valid;
 
@@ -20,6 +22,8 @@ import javax.validation.Valid;
 @RequestMapping("/admin/categories")
 @RequiredArgsConstructor
 @Slf4j
+@SuppressFBWarnings("EI_EXPOSE_REP2")
+
 public class CategoryAdminController {
 
     private final CategoryService categoryService;

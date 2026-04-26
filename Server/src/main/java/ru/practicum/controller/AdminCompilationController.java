@@ -8,6 +8,7 @@ import ru.practicum.dto.CompilationDto;
 import ru.practicum.dto.NewCompilationDto;
 import ru.practicum.dto.UpdateCompilationRequest;
 import ru.practicum.service.CompilationService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -16,6 +17,7 @@ import javax.validation.constraints.Positive;
 @RequestMapping("/admin/compilations")
 @RequiredArgsConstructor
 @Validated
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 public class AdminCompilationController {
     private final CompilationService compilationService;
 

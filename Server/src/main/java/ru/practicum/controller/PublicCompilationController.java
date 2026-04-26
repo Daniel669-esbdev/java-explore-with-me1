@@ -5,6 +5,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.CompilationDto;
 import ru.practicum.service.CompilationService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -14,6 +16,8 @@ import java.util.List;
 @RequestMapping("/compilations")
 @RequiredArgsConstructor
 @Validated
+@SuppressFBWarnings("EI_EXPOSE_REP2")
+
 public class PublicCompilationController {
     private final CompilationService compilationService;
 

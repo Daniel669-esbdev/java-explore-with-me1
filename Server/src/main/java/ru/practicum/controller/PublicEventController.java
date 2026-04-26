@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.EventFullDto;
 import ru.practicum.dto.EventShortDto;
 import ru.practicum.service.EventService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
@@ -18,6 +20,8 @@ import java.util.List;
 @RequestMapping("/events")
 @RequiredArgsConstructor
 @Validated
+@SuppressFBWarnings("EI_EXPOSE_REP2")
+
 public class PublicEventController {
     private final EventService eventService;
 

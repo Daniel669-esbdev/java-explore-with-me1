@@ -6,6 +6,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.service.CategoryService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -16,6 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @Validated
+@SuppressFBWarnings("EI_EXPOSE_REP2")
+
 public class CategoryPublicController {
     private final CategoryService categoryService;
 
