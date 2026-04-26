@@ -11,6 +11,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=practicum
       - SPRING_DATASOURCE_PASSWORD=practicum
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    volumes:
+      - ./.github/workflows/wait-for-it.sh:/wait-for-it.sh
 
   stats-db:
     image: postgres:14-alpine
@@ -33,6 +35,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=practicum
       - SPRING_DATASOURCE_PASSWORD=practicum
       - JAVA-EXPLORE-WITH-ME_URL=http://stats-server:9090
+    volumes:
+      - ./.github/workflows/wait-for-it.sh:/wait-for-it.sh
 
   ewm-db:
     image: postgres:14-alpine
