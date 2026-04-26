@@ -1,17 +1,6 @@
-services:
-  stats-server:
-    build: ./api-gateway
-    container_name: stats-server
-    ports:
-      - "9090:9090"
-    restart: always
-    depends_on:
-      - stats-db
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/ewm-stats
-      - SPRING_DATASOURCE_USERNAME=practicum
-      - SPRING_DATASOURCE_PASSWORD=practicum
+version: '3.8'
 
+services:
   stats-db:
     image: postgres:16.1
     container_name: stats-db
@@ -19,21 +8,30 @@ services:
       - POSTGRES_DB=ewm-stats
       - POSTGRES_USER=practicum
       - POSTGRES_PASSWORD=practicum
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U practicum -d ewm-stats"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  ewm-service:
-    build: ./Server
-    container_name: ewm-service
+  stats-server:
+    build: ./api-gateway
+    container_name: stats-server
     ports:
-      - "8080:8080"
+      - "9090:9090"
     restart: always
     depends_on:
-      - ewm-db
-      - stats-server
+      stats-db:
+        condition: service_healthy
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-main
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/ewm-stats
       - SPRING_DATASOURCE_USERNAME=practicum
       - SPRING_DATASOURCE_PASSWORD=practicum
-      - JAVA-EXPLORE-WITH-ME_URL=http://stats-server:9090
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9090/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   ewm-db:
     image: postgres:16.1
@@ -42,3 +40,25 @@ services:
       - POSTGRES_DB=ewm-main
       - POSTGRES_USER=practicum
       - POSTGRES_PASSWORD=practicum
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U practicum -d ewm-main"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ewm-service:
+    build: ./Server
+    container_name: ewm-service
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      ewm-db:
+        condition: service_healthy
+      stats-server:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-main
+      - SPRING_DATASOURCE_USERNAME=practicum
+      - SPRING_DATASOURCE_PASSWORD=practicum
+      - STATS_SERVER_URL=http://stats-server:9090
