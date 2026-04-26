@@ -39,7 +39,7 @@ public class EventPrivateController {
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
             @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info("Private: запрос событий пользователем id={}, from={}, size={}", userId, from, size);
+        log.info("Private: запрос событй пользователем id={}, from={}, size={}", userId, from, size);
         return eventService.getEventsByUserId(userId, from, size);
     }
 
