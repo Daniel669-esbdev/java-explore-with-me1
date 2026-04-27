@@ -2,7 +2,7 @@ package ru.practicum.exception;
 
 import lombok.Builder;
 import lombok.Getter;
-
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -13,4 +13,8 @@ public class ApiError {
     private final String reason;
     private final String status;
     private final String timestamp;
+
+    public List<String> getErrors() {
+        return errors == null ? null : new ArrayList<>(errors);
+    }
 }

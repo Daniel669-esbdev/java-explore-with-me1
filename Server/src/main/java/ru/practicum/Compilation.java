@@ -1,20 +1,8 @@
 package ru.practicum;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
+import lombok.*;
+import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -42,4 +30,12 @@ public class Compilation {
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
     private Set<Event> events;
+
+    public Set<Event> getEvents() {
+        return events == null ? null : new HashSet<>(events);
+    }
+
+    public void setEvents(Set<Event> events) {
+        this.events = events == null ? null : new HashSet<>(events);
+    }
 }
