@@ -9,6 +9,7 @@ import ru.practicum.dto.CompilationDto;
 import ru.practicum.dto.NewCompilationDto;
 import ru.practicum.dto.UpdateCompilationRequest;
 import ru.practicum.service.CompilationService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import javax.validation.Valid;
 
@@ -17,6 +18,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 @Validated
 @Slf4j
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 public class AdminCompilationController {
     private final CompilationService compilationService;
 

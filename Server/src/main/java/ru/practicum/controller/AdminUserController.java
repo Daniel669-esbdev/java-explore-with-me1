@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.NewUserRequest;
 import ru.practicum.dto.UserDto;
 import ru.practicum.service.UserService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -19,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 @Slf4j
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 public class AdminUserController {
     private final UserService userService;
 

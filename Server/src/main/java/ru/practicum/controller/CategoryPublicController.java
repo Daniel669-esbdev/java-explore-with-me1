@@ -10,12 +10,14 @@ import ru.practicum.service.CategoryService;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @RestController
 @RequestMapping("/categories")
 @RequiredArgsConstructor
 @Validated
 @Slf4j
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 public class CategoryPublicController {
     private final CategoryService categoryService;
 

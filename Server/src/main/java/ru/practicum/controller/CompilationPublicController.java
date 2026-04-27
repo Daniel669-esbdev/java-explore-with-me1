@@ -10,12 +10,14 @@ import ru.practicum.service.CompilationService;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @RestController
 @RequestMapping("/compilations")
 @RequiredArgsConstructor
 @Validated
 @Slf4j
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 public class CompilationPublicController {
     private final CompilationService compilationService;
 
