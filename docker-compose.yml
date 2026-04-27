@@ -6,6 +6,8 @@ services:
       POSTGRES_DB: stats
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
 
   stats-server:
     build: ./api-gateway
@@ -26,9 +28,10 @@ services:
       POSTGRES_DB: ewm
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
 
   ewm-service:
-    # ИСПОЛЬЗУЕМ РЕАЛЬНЫЙ ПУТЬ:
     build: ./Server
     container_name: ewm-service
     ports:
