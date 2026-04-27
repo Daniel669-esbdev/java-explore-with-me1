@@ -1,43 +1,41 @@
 package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.ParticipationRequestDto;
 import ru.practicum.service.EventService;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import java.util.List;
 
 @RestController
 @RequestMapping("/users/{userId}/requests")
 @RequiredArgsConstructor
 @Validated
-@SuppressFBWarnings("EI_EXPOSE_REP2")
-
+@Slf4j
 public class PrivateRequestController {
     private final EventService eventService;
 
     @GetMapping
-    public List<ParticipationRequestDto> getRequests(@PathVariable @Positive Long userId) {
+    public List<ParticipationRequestDto> getRequests(@PathVariable Long userId) {
+        log.info("Get user requests: userId={}", userId);
         return eventService.getRequestsByUserId(userId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ParticipationRequestDto createRequest(@PathVariable @Positive Long userId,
-                                                 @RequestParam @NotNull Long eventId) {
+    public ParticipationRequestDto createRequest(@PathVariable Long userId,
+                                                 @RequestParam Long eventId) {
+        log.info("Create request: userId={}, eventId={}", userId, eventId);
         return eventService.createParticipationRequest(userId, eventId);
     }
 
     @PatchMapping("/{requestId}/cancel")
-    @ResponseStatus(HttpStatus.OK)
-    public ParticipationRequestDto cancelRequest(@PathVariable @Positive Long userId,
-                                                 @PathVariable @Positive Long requestId) {
+    public ParticipationRequestDto cancelRequest(@PathVariable Long userId,
+                                                 @PathVariable Long requestId) {
+        log.info("Cancel request: userId={}, requestId={}", userId, requestId);
         return eventService.cancelParticipationRequest(userId, requestId);
     }
 }

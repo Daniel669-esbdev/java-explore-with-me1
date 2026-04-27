@@ -1,5 +1,6 @@
 package ru.practicum.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,8 +11,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 
 @RestControllerAdvice
+@Slf4j
 public class ErrorHandler {
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -19,14 +22,17 @@ public class ErrorHandler {
     @ExceptionHandler({
             MethodArgumentNotValidException.class,
             ConstraintViolationException.class,
-            IllegalArgumentException.class
+            IllegalArgumentException.class,
+            ValidationException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidationException(final Exception e) {
+        log.warn("400 Bad Request: {}", e.getMessage());
         return ApiError.builder()
-                .status("BAD_REQUEST")
+                .status(HttpStatus.BAD_REQUEST.name())
                 .reason("Incorrectly made request.")
                 .message(e.getMessage())
+                .errors(Collections.emptyList())
                 .timestamp(LocalDateTime.now().format(formatter))
                 .build();
     }
@@ -34,32 +40,25 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleNotFound(final NotFoundException e) {
+        log.warn("404 Not Found: {}", e.getMessage());
         return ApiError.builder()
-                .status("NOT_FOUND")
+                .status(HttpStatus.NOT_FOUND.name())
                 .reason("The required object was not found.")
                 .message(e.getMessage())
+                .errors(Collections.emptyList())
                 .timestamp(LocalDateTime.now().format(formatter))
                 .build();
     }
 
-    @ExceptionHandler
+    @ExceptionHandler({DataIntegrityViolationException.class, ConflictException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleDataIntegrityViolation(final DataIntegrityViolationException e) {
+    public ApiError handleConflict(final Exception e) {
+        log.warn("409 Conflict: {}", e.getMessage());
         return ApiError.builder()
-                .status("CONFLICT")
-                .reason("Integrity constraint has been violated.")
+                .status(HttpStatus.CONFLICT.name())
+                .reason("Integrity constraint has been violated or conditions not met.")
                 .message(e.getMessage())
-                .timestamp(LocalDateTime.now().format(formatter))
-                .build();
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleConflictException(final ConflictException e) {
-        return ApiError.builder()
-                .status("CONFLICT")
-                .reason("For the requested operation the conditions are not met.")
-                .message(e.getMessage())
+                .errors(Collections.emptyList())
                 .timestamp(LocalDateTime.now().format(formatter))
                 .build();
     }
@@ -67,10 +66,12 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleThrowable(final Throwable e) {
+        log.error("500 Internal Server Error: ", e);
         return ApiError.builder()
-                .status("INTERNAL_SERVER_ERROR")
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.name())
                 .reason("An unexpected error occurred.")
                 .message(e.getMessage())
+                .errors(Collections.emptyList())
                 .timestamp(LocalDateTime.now().format(formatter))
                 .build();
     }

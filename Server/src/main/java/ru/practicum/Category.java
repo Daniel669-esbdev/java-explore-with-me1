@@ -21,7 +21,6 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Builder
 public class Category {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

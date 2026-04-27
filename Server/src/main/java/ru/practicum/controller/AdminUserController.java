@@ -1,14 +1,13 @@
 package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.NewUserRequest;
 import ru.practicum.dto.UserDto;
 import ru.practicum.service.UserService;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -19,7 +18,7 @@ import java.util.List;
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
 @Validated
-@SuppressFBWarnings("EI_EXPOSE_REP2")
+@Slf4j
 public class AdminUserController {
     private final UserService userService;
 
@@ -28,18 +27,21 @@ public class AdminUserController {
             @RequestParam(required = false) List<Long> ids,
             @PositiveOrZero @RequestParam(defaultValue = "0") int from,
             @Positive @RequestParam(defaultValue = "10") int size) {
+        log.info("Get users request: ids={}, from={}, size={}", ids, from, size);
         return userService.getUsers(ids, from, size);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto createUser(@Valid @RequestBody NewUserRequest newUserRequest) {
+        log.info("Create user request: {}", newUserRequest.getName());
         return userService.createUser(newUserRequest);
     }
 
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable @Positive Long userId) {
+    public void deleteUser(@PathVariable Long userId) {
+        log.info("Delete user request: userId={}", userId);
         userService.deleteUser(userId);
     }
 }

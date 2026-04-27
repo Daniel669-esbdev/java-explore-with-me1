@@ -1,5 +1,11 @@
 package ru.practicum;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,19 +15,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import java.util.Set;
 
-@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 @Entity
 @Table(name = "compilations")
 @Getter
 @Setter
+@AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class Compilation {
@@ -42,19 +42,4 @@ public class Compilation {
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
     private Set<Event> events;
-
-    public Compilation(Long id, Boolean pinned, String title, Set<Event> events) {
-        this.id = id;
-        this.pinned = pinned;
-        this.title = title;
-        this.events = (events == null) ? null : new java.util.HashSet<>(events);
-    }
-
-    public Set<Event> getEvents() {
-        return (events == null) ? null : new java.util.HashSet<>(events);
-    }
-
-    public void setEvents(Set<Event> events) {
-        this.events = (events == null) ? null : new java.util.HashSet<>(events);
-    }
 }

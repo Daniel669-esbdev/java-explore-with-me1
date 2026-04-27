@@ -6,8 +6,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.service.CategoryService;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -16,10 +14,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/categories")
 @RequiredArgsConstructor
-@Slf4j
 @Validated
-@SuppressFBWarnings("EI_EXPOSE_REP2")
-
+@Slf4j
 public class CategoryPublicController {
     private final CategoryService categoryService;
 
@@ -27,13 +23,13 @@ public class CategoryPublicController {
     public List<CategoryDto> getCategories(
             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
             @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info("Public: получение списка категорий, from={}, size={}", from, size);
+        log.info("Get categories: from={}, size={}", from, size);
         return categoryService.getCategories(from, size);
     }
 
     @GetMapping("/{catId}")
     public CategoryDto getCategoryById(@PathVariable Long catId) {
-        log.info("Public: получение категории по id={}", catId);
+        log.info("Get category by id: {}", catId);
         return categoryService.getCategoryById(catId);
     }
 }

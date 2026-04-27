@@ -4,24 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.dto.EventFullDto;
-import ru.practicum.dto.EventShortDto;
-import ru.practicum.dto.NewEventDto;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.dto.*;
 import ru.practicum.service.EventService;
-import ru.practicum.dto.*;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-
-import ru.practicum.dto.*;
-import org.springframework.web.bind.annotation.PatchMapping;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -30,10 +16,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/users/{userId}/events")
 @RequiredArgsConstructor
-@Slf4j
 @Validated
-@SuppressFBWarnings("EI_EXPOSE_REP2")
-
+@Slf4j
 public class EventPrivateController {
     private final EventService eventService;
 
@@ -42,7 +26,7 @@ public class EventPrivateController {
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
             @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info("Private: запрос событй пользователем id={}, from={}, size={}", userId, from, size);
+        log.info("Get user events: userId={}, from={}, size={}", userId, from, size);
         return eventService.getEventsByUserId(userId, from, size);
     }
 
@@ -50,7 +34,7 @@ public class EventPrivateController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto addEvent(@PathVariable Long userId,
                                  @Valid @RequestBody NewEventDto newEventDto) {
-        log.info("Private: создание события пользователем id={}", userId);
+        log.info("Add event: userId={}, title={}", userId, newEventDto.getTitle());
         return eventService.createEvent(userId, newEventDto);
     }
 
@@ -59,7 +43,7 @@ public class EventPrivateController {
             @PathVariable Long userId,
             @PathVariable Long eventId,
             @Valid @RequestBody UpdateEventUserRequest updateRequest) {
-        log.info("Private: обновление события id={} пользователем id={}", eventId, userId);
+        log.info("Update event by initiator: userId={}, eventId={}", userId, eventId);
         return eventService.updateEventByUser(userId, eventId, updateRequest);
     }
 
@@ -67,7 +51,7 @@ public class EventPrivateController {
     public List<ParticipationRequestDto> getEventRequests(
             @PathVariable Long userId,
             @PathVariable Long eventId) {
-        log.info("Private: запрос заявок на участие в событии id={} владельцем id={}", eventId, userId);
+        log.info("Get event requests: userId={}, eventId={}", userId, eventId);
         return eventService.getEventRequests(userId, eventId);
     }
 
@@ -75,10 +59,8 @@ public class EventPrivateController {
     public EventRequestStatusUpdateResult updateRequestStatus(
             @PathVariable Long userId,
             @PathVariable Long eventId,
-            @RequestBody EventRequestStatusUpdateRequest updateRequest) {
-        log.info("Private: изменение статуса заявок для события id={} пользователем id={}", eventId, userId);
+            @Valid @RequestBody EventRequestStatusUpdateRequest updateRequest) {
+        log.info("Update requests status: userId={}, eventId={}", userId, eventId);
         return eventService.updateRequestStatus(userId, eventId, updateRequest);
     }
-
-
 }
