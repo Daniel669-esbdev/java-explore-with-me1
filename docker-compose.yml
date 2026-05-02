@@ -32,7 +32,7 @@ services:
       - "5433:5432"
 
   ewm-service:
-    build: ./ewm-service
+    build: ewm-service
     container_name: ewm-service
     ports:
       - "8080:8080"
