@@ -10,7 +10,7 @@ services:
       - "5432:5432"
 
   stats-server:
-    build: ./api-gateway
+    build: ./stats/stats-server
     container_name: stats-server
     ports:
       - "9090:9090"
@@ -32,7 +32,7 @@ services:
       - "5433:5432"
 
   ewm-service:
-    build: ./Server
+    build: ./ewm-service
     container_name: ewm-service
     ports:
       - "8080:8080"
