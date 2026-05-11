@@ -1,5 +1,6 @@
 package ru.practicum.controller;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -15,8 +16,8 @@ import javax.validation.Valid;
 @RequestMapping("/admin/compilations")
 @RequiredArgsConstructor
 @Validated
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 public class AdminCompilationController {
-
     private final CompilationService compilationService;
 
     @PostMapping
