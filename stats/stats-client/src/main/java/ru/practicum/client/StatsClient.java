@@ -2,37 +2,35 @@ package ru.practicum.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.EndpointHitDto;
 
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class StatsClient {
-    private final RestTemplate rest;
 
-    public StatsClient(@Value("${java-explore-with-me.url}") String serverUrl, RestTemplateBuilder builder) {
-        this.rest = builder
+    private final RestTemplate restTemplate;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public StatsClient(@Value("${stats-server.url:http://localhost:9090}") String serverUrl,
+                       RestTemplateBuilder builder) {
+        this.restTemplate = builder
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
-                .requestFactory(HttpComponentsClientHttpRequestFactory::new)
                 .build();
     }
 
-    public void saveHit(EndpointHitDto hitDto) {
-        rest.postForLocation("/hit", hitDto);
-    }
+    public void saveHit(String app, String uri, String ip, LocalDateTime timestamp) {
+        EndpointHitDto hitDto = EndpointHitDto.builder()
+                .app(app)
+                .uri(uri)
+                .ip(ip)
+                .timestamp(timestamp.format(FORMATTER))
+                .build();
 
-    public ResponseEntity<Object> getStats(String start, String end, String[] uris, boolean unique) {
-        Map<String, Object> parameters = Map.of(
-                "start", start,
-                "end", end,
-                "uris", uris,
-                "unique", unique
-        );
-        return rest.getForEntity("/stats?start={start}&end={end}&uris={uris}&unique={unique}", Object.class, parameters);
+        restTemplate.postForLocation("/hit", hitDto);
     }
 }
