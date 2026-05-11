@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 
 @Data
 public class NewEventDto {
-
     @NotBlank
     @Size(min = 20, max = 2000)
     private String annotation;

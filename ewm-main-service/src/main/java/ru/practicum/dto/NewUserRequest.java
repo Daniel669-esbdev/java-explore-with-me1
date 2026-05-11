@@ -7,7 +7,6 @@ import javax.validation.constraints.Size;
 
 @Data
 public class NewUserRequest {
-
     @NotBlank
     @Size(min = 2, max = 250)
     private String name;

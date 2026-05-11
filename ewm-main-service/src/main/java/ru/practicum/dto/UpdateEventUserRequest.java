@@ -3,13 +3,11 @@ package ru.practicum.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import ru.practicum.model.Location;
-
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Data
 public class UpdateEventUserRequest {
-
     @Size(min = 20, max = 2000)
     private String annotation;
 
