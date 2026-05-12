@@ -14,6 +14,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class ParticipationRequestController {
+
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("EI_EXPOSE_REP2")
     private final RequestService requestService;
 
     @GetMapping
