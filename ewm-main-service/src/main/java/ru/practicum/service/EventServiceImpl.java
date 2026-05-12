@@ -8,6 +8,7 @@ import ru.practicum.dto.*;
 import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 import ru.practicum.model.EventState;
@@ -15,7 +16,6 @@ import ru.practicum.model.User;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.UserRepository;
-import ru.practicum.mapper.EventMapper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -27,25 +27,19 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
-
     private final UserRepository userRepository;
-
     private final CategoryRepository categoryRepository;
-
     private final StatsClient statsClient;
-
     private final EventMapper eventMapper;
 
     @Override
     @Transactional
     public EventFullDto updateEventAdmin(Long eventId, UpdateEventAdminRequest request) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найдено"));
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
 
         if (request.getEventDate() != null) {
-            if (request.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
-                throw new ConflictException("Дата начала события должна быть не ранее чем за час от публикации.");
-            }
+            validateEventDate(request.getEventDate());
             event.setEventDate(request.getEventDate());
         }
 
@@ -56,14 +50,18 @@ public class EventServiceImpl implements EventService {
                 }
                 event.setState(EventState.PUBLISHED);
                 event.setPublishedOn(LocalDateTime.now());
-            }
-
-            if (request.getStateAction() == UpdateEventAdminRequest.StateAction.REJECT_EVENT) {
+            } else if (request.getStateAction() == UpdateEventAdminRequest.StateAction.REJECT_EVENT) {
                 if (event.getState() == EventState.PUBLISHED) {
                     throw new ConflictException("Нельзя отклонить опубликованное событие");
                 }
                 event.setState(EventState.CANCELED);
             }
+        }
+
+        if (request.getCategory() != null) {
+            Category category = categoryRepository.findById(request.getCategory())
+                    .orElseThrow(() -> new NotFoundException("Category not found"));
+            event.setCategory(category);
         }
 
         updateEventFields(event, request.getAnnotation(), request.getDescription(), request.getTitle(),
@@ -88,9 +86,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventFullDto addEventPrivate(Long userId, NewEventDto newEventDto) {
-        if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new BadRequestException("Event date must be at least 2 hours from now");
-        }
+        validateEventDate(newEventDto.getEventDate());
 
         User initiator = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
@@ -102,6 +98,8 @@ public class EventServiceImpl implements EventService {
         event.setCategory(category);
         event.setCreatedOn(LocalDateTime.now());
         event.setState(EventState.PENDING);
+        event.setConfirmedRequests(0);
+        event.setViews(0L);
 
         if (event.getPaid() == null) event.setPaid(false);
         if (event.getParticipantLimit() == null) event.setParticipantLimit(0);
@@ -128,10 +126,14 @@ public class EventServiceImpl implements EventService {
         }
 
         if (request.getEventDate() != null) {
-            if (request.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-                throw new BadRequestException("Event date must be at least 2 hours from now");
-            }
+            validateEventDate(request.getEventDate());
             event.setEventDate(request.getEventDate());
+        }
+
+        if (request.getCategory() != null) {
+            Category category = categoryRepository.findById(request.getCategory())
+                    .orElseThrow(() -> new NotFoundException("Category not found"));
+            event.setCategory(category);
         }
 
         if (request.getStateAction() != null) {
@@ -148,13 +150,22 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
 
+    private void validateEventDate(LocalDateTime eventDate) {
+        if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new BadRequestException("Event date must be at least 2 hours from now");
+        }
+    }
+
     private void updateEventFields(Event event, String annotation, String description, String title,
                                    Boolean paid, Integer participantLimit, Boolean requestModeration) {
         if (annotation != null) event.setAnnotation(annotation);
         if (description != null) event.setDescription(description);
         if (title != null) event.setTitle(title);
         if (paid != null) event.setPaid(paid);
-        if (participantLimit != null) event.setParticipantLimit(participantLimit);
+        if (participantLimit != null) {
+            if (participantLimit < 0) throw new BadRequestException("Limit cannot be negative");
+            event.setParticipantLimit(participantLimit);
+        }
         if (requestModeration != null) event.setRequestModeration(requestModeration);
     }
 
