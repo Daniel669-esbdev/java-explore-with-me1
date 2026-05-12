@@ -12,19 +12,15 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface EventMapper {
 
-    @Mapping(target = "category", source = "category")
-    @Mapping(target = "initiator", source = "initiator")
-    @Mapping(target = "location", source = "location")
+    @Mapping(target = "initiator.id", source = "initiatorId")
     EventFullDto toEventFullDto(Event event);
 
-    @Mapping(target = "category", source = "category")
-    @Mapping(target = "initiator", source = "initiator")
+    @Mapping(target = "initiator.id", source = "initiatorId")
     EventShortDto toEventShortDto(Event event);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
-    @Mapping(target = "initiator", ignore = true)
-    @Mapping(target = "location", source = "location")
+    @Mapping(target = "initiatorId", ignore = true)
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
     @Mapping(target = "views", ignore = true)
