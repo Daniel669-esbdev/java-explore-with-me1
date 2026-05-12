@@ -1,6 +1,5 @@
 package ru.practicum.exception;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +9,6 @@ import java.util.List;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class ApiError {
     private List<String> errors;
@@ -18,6 +16,14 @@ public class ApiError {
     private String reason;
     private String status;
     private String timestamp;
+
+    public ApiError(List<String> errors, String message, String reason, String status, String timestamp) {
+        this.errors = errors == null ? null : new ArrayList<>(errors);
+        this.message = message;
+        this.reason = reason;
+        this.status = status;
+        this.timestamp = timestamp;
+    }
 
     public List<String> getErrors() {
         return errors == null ? null : new ArrayList<>(errors);
