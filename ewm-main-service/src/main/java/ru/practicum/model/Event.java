@@ -91,7 +91,6 @@ public class Event {
         this.views = views;
     }
 
-    // Методы для работы с координатами напрямую (решают ошибки из сервиса)
     public void setLat(Float lat) {
         if (this.location == null) this.location = new Location();
         this.location.setLat(lat);
@@ -159,7 +158,8 @@ public class Event {
         }
 
         public EventBuilder category(Category category) {
-            this.category = category;
+            this.category = (category == null) ? null :
+                    new Category(category.getId(), category.getName());
             return this;
         }
 
@@ -184,12 +184,14 @@ public class Event {
         }
 
         public EventBuilder initiator(User initiator) {
-            this.initiator = initiator;
+            this.initiator = (initiator == null) ? null :
+                    new User(initiator.getId(), initiator.getEmail(), initiator.getName());
             return this;
         }
 
         public EventBuilder location(Location location) {
-            this.location = location;
+            this.location = (location == null) ? null :
+                    new Location(location.getLat(), location.getLon());
             return this;
         }
 
