@@ -1,6 +1,5 @@
 package ru.practicum.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
@@ -9,7 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class NewCompilationDto {
     private Set<Long> events;
@@ -17,6 +15,12 @@ public class NewCompilationDto {
     @NotBlank
     @Size(min = 1, max = 50)
     private String title;
+
+    public NewCompilationDto(Set<Long> events, boolean pinned, String title) {
+        this.events = events == null ? null : new HashSet<>(events);
+        this.pinned = pinned;
+        this.title = title;
+    }
 
     public Set<Long> getEvents() {
         return events == null ? null : new HashSet<>(events);

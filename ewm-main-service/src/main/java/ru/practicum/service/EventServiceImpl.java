@@ -11,6 +11,7 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Event;
 import ru.practicum.model.EventState;
 import ru.practicum.repository.EventRepository;
+import ru.practicum.mapper.EventMapper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
     private final StatsClient statsClient;
+    private final EventMapper eventMapper;
 
     @Override
     @Transactional
@@ -61,9 +63,9 @@ public class EventServiceImpl implements EventService {
         if (request.getParticipantLimit() != null) event.setParticipantLimit(request.getParticipantLimit());
         if (request.getRequestModeration() != null) event.setRequestModeration(request.getRequestModeration());
 
-        event = eventRepository.save(event);
+        Event savedEvent = eventRepository.save(event);
 
-        return null;
+        return eventMapper.toEventFullDto(savedEvent);
     }
 
     @Override
@@ -94,7 +96,7 @@ public class EventServiceImpl implements EventService {
         }
 
         statsClient.saveHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
-        return null;
+        return eventMapper.toEventFullDto(event);
     }
 
     @Override
