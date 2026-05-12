@@ -1,6 +1,5 @@
 package ru.practicum.controller;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
@@ -19,8 +18,8 @@ import java.util.List;
 @RequestMapping("/events")
 @RequiredArgsConstructor
 @Validated
-@SuppressFBWarnings("EI_EXPOSE_REP2")
 public class EventPublicController {
+
     private final EventService eventService;
 
     @GetMapping
