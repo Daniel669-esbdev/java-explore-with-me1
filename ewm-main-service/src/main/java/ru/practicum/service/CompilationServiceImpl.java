@@ -10,7 +10,6 @@ import ru.practicum.dto.UpdateCompilationRequest;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Compilation;
 import ru.practicum.repository.CompilationRepository;
-import ru.practicum.repository.EventRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
