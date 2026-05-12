@@ -1,6 +1,7 @@
 package ru.practicum.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.client.StatsClient;
@@ -9,17 +10,16 @@ import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.EventMapper;
-import ru.practicum.model.Category;
-import ru.practicum.model.Event;
-import ru.practicum.model.EventState;
-import ru.practicum.model.User;
+import ru.practicum.model.*;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.UserRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,6 +62,11 @@ public class EventServiceImpl implements EventService {
             Category category = categoryRepository.findById(request.getCategory())
                     .orElseThrow(() -> new NotFoundException("Category not found"));
             event.setCategory(category);
+        }
+
+        if (request.getLocation() != null) {
+            event.setLat(request.getLocation().getLat());
+            event.setLon(request.getLocation().getLon());
         }
 
         updateEventFields(event, request.getAnnotation(), request.getDescription(), request.getTitle(),
@@ -136,6 +141,11 @@ public class EventServiceImpl implements EventService {
             event.setCategory(category);
         }
 
+        if (request.getLocation() != null) {
+            event.setLat(request.getLocation().getLat());
+            event.setLon(request.getLocation().getLon());
+        }
+
         if (request.getStateAction() != null) {
             if (request.getStateAction() == UpdateEventUserRequest.StateAction.SEND_TO_REVIEW) {
                 event.setState(EventState.PENDING);
@@ -171,13 +181,31 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getEventsPrivate(Long userId, int from, int size) {
-        return List.of();
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found");
+        }
+        return eventRepository.findAllByInitiatorId(userId, PageRequest.of(from / size, size))
+                .stream()
+                .map(eventMapper::toEventShortDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<EventFullDto> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories,
                                              LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
-        return List.of();
+        List<EventState> eventStates = null;
+        if (states != null) {
+            eventStates = states.stream()
+                    .map(EventState::valueOf)
+                    .collect(Collectors.toList());
+        }
+
+        List<Event> events = eventRepository.findEventsAdmin(users, eventStates, categories, rangeStart, rangeEnd,
+                PageRequest.of(from / size, size));
+
+        return events.stream()
+                .map(eventMapper::toEventFullDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -185,6 +213,23 @@ public class EventServiceImpl implements EventService {
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                Boolean onlyAvailable, String sort, int from, int size,
                                                HttpServletRequest request) {
-        return List.of();
+        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
+            throw new BadRequestException("Start must be before end");
+        }
+
+        List<Event> events = eventRepository.findEventsPublic(text, categories, paid, rangeStart, rangeEnd,
+                PageRequest.of(from / size, size));
+
+        if (Boolean.TRUE.equals(onlyAvailable)) {
+            events = events.stream()
+                    .filter(e -> e.getParticipantLimit() == 0 || e.getConfirmedRequests() < e.getParticipantLimit())
+                    .collect(Collectors.toList());
+        }
+
+        statsClient.saveHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
+
+        return events.stream()
+                .map(eventMapper::toEventShortDto)
+                .collect(Collectors.toList());
     }
 }
