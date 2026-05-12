@@ -9,8 +9,11 @@ import ru.practicum.model.EventState;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
+
+    Optional<Event> findByIdAndInitiatorId(Long id, Long initiatorId);
 
     @Query("SELECT e FROM Event e " +
             "WHERE (:users IS NULL OR e.initiatorId IN :users) " +

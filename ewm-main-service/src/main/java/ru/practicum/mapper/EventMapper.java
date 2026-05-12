@@ -13,22 +13,23 @@ import java.util.List;
 public interface EventMapper {
 
     @Mapping(target = "category", source = "category")
-    @Mapping(target = "initiator.id", source = "initiatorId")
+    @Mapping(target = "initiator", source = "initiator")
     @Mapping(target = "location", source = "location")
     EventFullDto toEventFullDto(Event event);
 
     @Mapping(target = "category", source = "category")
-    @Mapping(target = "initiator.id", source = "initiatorId")
+    @Mapping(target = "initiator", source = "initiator")
     EventShortDto toEventShortDto(Event event);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
-    @Mapping(target = "initiatorId", ignore = true)
+    @Mapping(target = "initiator", ignore = true)
     @Mapping(target = "location", source = "location")
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
     @Mapping(target = "views", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
     Event toEvent(NewEventDto newEventDto);
 
     List<EventShortDto> toEventShortDtoList(List<Event> events);

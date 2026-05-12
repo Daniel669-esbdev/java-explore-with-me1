@@ -8,10 +8,15 @@ import ru.practicum.dto.CompilationDto;
 import ru.practicum.dto.NewCompilationDto;
 import ru.practicum.dto.UpdateCompilationRequest;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Compilation;
+import ru.practicum.model.Event;
 import ru.practicum.repository.CompilationRepository;
+import ru.practicum.repository.EventRepository;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,14 +25,19 @@ import java.util.stream.Collectors;
 public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
+    private final EventRepository eventRepository;
+    private final EventMapper eventMapper;
 
     @Override
     @Transactional
     public CompilationDto addCompilation(NewCompilationDto newCompilationDto) {
+        Set<Long> eventIds = newCompilationDto.getEvents() != null ?
+                newCompilationDto.getEvents() : new HashSet<>();
+
         Compilation compilation = Compilation.builder()
                 .pinned(newCompilationDto.isPinned())
                 .title(newCompilationDto.getTitle())
-                .events(newCompilationDto.getEvents())
+                .events(eventIds)
                 .build();
 
         return toCompilationDto(compilationRepository.save(compilation));
@@ -64,13 +74,9 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public List<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
         PageRequest page = PageRequest.of(from / size, size);
-        List<Compilation> compilations;
-
-        if (pinned != null) {
-            compilations = compilationRepository.findAllByPinned(pinned, page);
-        } else {
-            compilations = compilationRepository.findAll(page).getContent();
-        }
+        List<Compilation> compilations = (pinned != null) ?
+                compilationRepository.findAllByPinned(pinned, page) :
+                compilationRepository.findAll(page).getContent();
 
         return compilations.stream()
                 .map(this::toCompilationDto)
@@ -85,11 +91,14 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private CompilationDto toCompilationDto(Compilation compilation) {
+        List<Event> events = eventRepository.findAllById(compilation.getEvents());
         return CompilationDto.builder()
                 .id(compilation.getId())
                 .pinned(compilation.getPinned())
                 .title(compilation.getTitle())
-                .events(List.of())
+                .events(events.stream()
+                        .map(eventMapper::toEventShortDto)
+                        .collect(Collectors.toList()))
                 .build();
     }
 }

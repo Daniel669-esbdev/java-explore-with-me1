@@ -8,9 +8,13 @@ import ru.practicum.dto.*;
 import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 import ru.practicum.model.EventState;
+import ru.practicum.model.User;
+import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
+import ru.practicum.repository.UserRepository;
 import ru.practicum.mapper.EventMapper;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,7 +27,13 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
+
+    private final UserRepository userRepository;
+
+    private final CategoryRepository categoryRepository;
+
     private final StatsClient statsClient;
+
     private final EventMapper eventMapper;
 
     @Override
@@ -34,7 +44,7 @@ public class EventServiceImpl implements EventService {
 
         if (request.getEventDate() != null) {
             if (request.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
-                throw new ConflictException("Дата начала события должна быть не ранее чем за час от даты публикации.");
+                throw new ConflictException("Дата начала события должна быть не ранее чем за час от публикации.");
             }
             event.setEventDate(request.getEventDate());
         }
@@ -42,7 +52,7 @@ public class EventServiceImpl implements EventService {
         if (request.getStateAction() != null) {
             if (request.getStateAction() == UpdateEventAdminRequest.StateAction.PUBLISH_EVENT) {
                 if (event.getState() != EventState.PENDING) {
-                    throw new ConflictException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
+                    throw new ConflictException("Событие можно публиковать только в состоянии PENDING");
                 }
                 event.setState(EventState.PUBLISHED);
                 event.setPublishedOn(LocalDateTime.now());
@@ -50,40 +60,16 @@ public class EventServiceImpl implements EventService {
 
             if (request.getStateAction() == UpdateEventAdminRequest.StateAction.REJECT_EVENT) {
                 if (event.getState() == EventState.PUBLISHED) {
-                    throw new ConflictException("Событие можно отклонить, только если оно еще не опубликовано");
+                    throw new ConflictException("Нельзя отклонить опубликованное событие");
                 }
                 event.setState(EventState.CANCELED);
             }
         }
 
-        if (request.getAnnotation() != null) event.setAnnotation(request.getAnnotation());
-        if (request.getDescription() != null) event.setDescription(request.getDescription());
-        if (request.getTitle() != null) event.setTitle(request.getTitle());
-        if (request.getPaid() != null) event.setPaid(request.getPaid());
-        if (request.getParticipantLimit() != null) event.setParticipantLimit(request.getParticipantLimit());
-        if (request.getRequestModeration() != null) event.setRequestModeration(request.getRequestModeration());
+        updateEventFields(event, request.getAnnotation(), request.getDescription(), request.getTitle(),
+                request.getPaid(), request.getParticipantLimit(), request.getRequestModeration());
 
-        Event savedEvent = eventRepository.save(event);
-
-        return eventMapper.toEventFullDto(savedEvent);
-    }
-
-    @Override
-    public List<EventFullDto> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories,
-                                             LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
-        return List.of();
-    }
-
-    @Override
-    public List<EventShortDto> getEventsPublic(String text, List<Long> categories, Boolean paid,
-                                               LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                               Boolean onlyAvailable, String sort, int from, int size,
-                                               HttpServletRequest request) {
-        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
-            throw new BadRequestException("RangeStart must be before RangeEnd");
-        }
-        statsClient.saveHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
-        return List.of();
+        return eventMapper.toEventFullDto(eventRepository.save(event));
     }
 
     @Override
@@ -100,38 +86,94 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getEventsPrivate(Long userId, int from, int size) {
-        return List.of();
-    }
-
-    @Override
     @Transactional
     public EventFullDto addEventPrivate(Long userId, NewEventDto newEventDto) {
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new BadRequestException("Event date must be at least 2 hours from now");
         }
-        return null;
+
+        User initiator = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        Category category = categoryRepository.findById(newEventDto.getCategory())
+                .orElseThrow(() -> new NotFoundException("Category not found"));
+
+        Event event = eventMapper.toEvent(newEventDto);
+        event.setInitiator(initiator);
+        event.setCategory(category);
+        event.setCreatedOn(LocalDateTime.now());
+        event.setState(EventState.PENDING);
+
+        if (event.getPaid() == null) event.setPaid(false);
+        if (event.getParticipantLimit() == null) event.setParticipantLimit(0);
+        if (event.getRequestModeration() == null) event.setRequestModeration(true);
+
+        return eventMapper.toEventFullDto(eventRepository.save(event));
     }
 
     @Override
     public EventFullDto getEventPrivate(Long userId, Long eventId) {
-        return null;
+        return eventRepository.findByIdAndInitiatorId(eventId, userId)
+                .map(eventMapper::toEventFullDto)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
     }
 
     @Override
     @Transactional
     public EventFullDto updateEventPrivate(Long userId, Long eventId, UpdateEventUserRequest request) {
-        Event event = eventRepository.findById(eventId)
+        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
 
         if (event.getState() == EventState.PUBLISHED) {
             throw new ConflictException("Only pending or canceled events can be changed");
         }
 
-        if (request.getEventDate() != null && request.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new BadRequestException("Event date must be at least 2 hours from now");
+        if (request.getEventDate() != null) {
+            if (request.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new BadRequestException("Event date must be at least 2 hours from now");
+            }
+            event.setEventDate(request.getEventDate());
         }
 
-        return null;
+        if (request.getStateAction() != null) {
+            if (request.getStateAction() == UpdateEventUserRequest.StateAction.SEND_TO_REVIEW) {
+                event.setState(EventState.PENDING);
+            } else if (request.getStateAction() == UpdateEventUserRequest.StateAction.CANCEL_REVIEW) {
+                event.setState(EventState.CANCELED);
+            }
+        }
+
+        updateEventFields(event, request.getAnnotation(), request.getDescription(), request.getTitle(),
+                request.getPaid(), request.getParticipantLimit(), request.getRequestModeration());
+
+        return eventMapper.toEventFullDto(eventRepository.save(event));
+    }
+
+    private void updateEventFields(Event event, String annotation, String description, String title,
+                                   Boolean paid, Integer participantLimit, Boolean requestModeration) {
+        if (annotation != null) event.setAnnotation(annotation);
+        if (description != null) event.setDescription(description);
+        if (title != null) event.setTitle(title);
+        if (paid != null) event.setPaid(paid);
+        if (participantLimit != null) event.setParticipantLimit(participantLimit);
+        if (requestModeration != null) event.setRequestModeration(requestModeration);
+    }
+
+    @Override
+    public List<EventShortDto> getEventsPrivate(Long userId, int from, int size) {
+        return List.of();
+    }
+
+    @Override
+    public List<EventFullDto> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories,
+                                             LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
+        return List.of();
+    }
+
+    @Override
+    public List<EventShortDto> getEventsPublic(String text, List<Long> categories, Boolean paid,
+                                               LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                               Boolean onlyAvailable, String sort, int from, int size,
+                                               HttpServletRequest request) {
+        return List.of();
     }
 }
