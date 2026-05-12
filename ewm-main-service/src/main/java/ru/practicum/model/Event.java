@@ -8,8 +8,6 @@ import java.time.LocalDateTime;
 @Table(name = "events")
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class Event {
 
@@ -71,28 +69,103 @@ public class Event {
     @Column(nullable = false)
     private Long views = 0L;
 
+    public Event(Long id, String annotation, Category category, Integer confirmedRequests,
+                 LocalDateTime createdOn, String description, LocalDateTime eventDate, User initiator,
+                 Location location, Boolean paid, Integer participantLimit, LocalDateTime publishedOn,
+                 Boolean requestModeration, EventState state, String title, Long views) {
+        this.id = id;
+        this.annotation = annotation;
+        this.setCategory(category);
+        this.confirmedRequests = confirmedRequests;
+        this.createdOn = createdOn;
+        this.description = description;
+        this.eventDate = eventDate;
+        this.setInitiator(initiator);
+        this.setLocation(location);
+        this.paid = paid;
+        this.participantLimit = participantLimit;
+        this.publishedOn = publishedOn;
+        this.requestModeration = requestModeration;
+        this.state = state;
+        this.title = title;
+        this.views = views;
+    }
+
     public Category getCategory() {
         return category != null ? new Category(category.getId(), category.getName()) : null;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category != null ? new Category(category.getId(), category.getName()) : null;
     }
 
     public User getInitiator() {
         return initiator != null ? new User(initiator.getId(), initiator.getEmail(), initiator.getName()) : null;
     }
 
-    public Location getLocation() {
-        return location != null ? new Location(location.getLat(), location.getLon()) : null;
-    }
-
-
-    public void setCategory(Category category) {
-        this.category = category != null ? new Category(category.getId(), category.getName()) : null;
-    }
-
     public void setInitiator(User initiator) {
         this.initiator = initiator != null ? new User(initiator.getId(), initiator.getEmail(), initiator.getName()) : null;
     }
 
+    public Location getLocation() {
+        return location != null ? new Location(location.getLat(), location.getLon()) : null;
+    }
+
     public void setLocation(Location location) {
         this.location = location != null ? new Location(location.getLat(), location.getLon()) : null;
+    }
+
+    public static EventBuilder builder() {
+        return new EventBuilder();
+    }
+
+    public static class EventBuilder {
+        private Long id;
+        private String annotation;
+        private Category category;
+        private Integer confirmedRequests;
+        private LocalDateTime createdOn;
+        private String description;
+        private LocalDateTime eventDate;
+        private User initiator;
+        private Location location;
+        private Boolean paid;
+        private Integer participantLimit;
+        private LocalDateTime publishedOn;
+        private Boolean requestModeration;
+        private EventState state;
+        private String title;
+        private Long views;
+
+        public EventBuilder id(Long id) { this.id = id; return this; }
+        public EventBuilder annotation(String annotation) { this.annotation = annotation; return this; }
+        public EventBuilder category(Category category) {
+            this.category = category != null ? new Category(category.getId(), category.getName()) : null;
+            return this;
+        }
+        public EventBuilder confirmedRequests(Integer confirmedRequests) { this.confirmedRequests = confirmedRequests; return this; }
+        public EventBuilder createdOn(LocalDateTime createdOn) { this.createdOn = createdOn; return this; }
+        public EventBuilder description(String description) { this.description = description; return this; }
+        public EventBuilder eventDate(LocalDateTime eventDate) { this.eventDate = eventDate; return this; }
+        public EventBuilder initiator(User initiator) {
+            this.initiator = initiator != null ? new User(initiator.getId(), initiator.getEmail(), initiator.getName()) : null;
+            return this;
+        }
+        public EventBuilder location(Location location) {
+            this.location = location != null ? new Location(location.getLat(), location.getLon()) : null;
+            return this;
+        }
+        public EventBuilder paid(Boolean paid) { this.paid = paid; return this; }
+        public EventBuilder participantLimit(Integer participantLimit) { this.participantLimit = participantLimit; return this; }
+        public EventBuilder publishedOn(LocalDateTime publishedOn) { this.publishedOn = publishedOn; return this; }
+        public EventBuilder requestModeration(Boolean requestModeration) { this.requestModeration = requestModeration; return this; }
+        public EventBuilder state(EventState state) { this.state = state; return this; }
+        public EventBuilder title(String title) { this.title = title; return this; }
+        public EventBuilder views(Long views) { this.views = views; return this; }
+
+        public Event build() {
+            return new Event(id, annotation, category, confirmedRequests, createdOn, description, eventDate,
+                    initiator, location, paid, participantLimit, publishedOn, requestModeration, state, title, views);
+        }
     }
 }
