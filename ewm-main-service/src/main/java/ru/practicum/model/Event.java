@@ -22,6 +22,8 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private Category category;
 
     @Column(name = "confirmed_requests")
@@ -38,9 +40,13 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "initiator_id", nullable = false)
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private User initiator;
 
     @Embedded
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private Location location;
 
     @Column(nullable = false)
@@ -64,4 +70,29 @@ public class Event {
 
     @Column(nullable = false)
     private Long views = 0L;
+
+    public Category getCategory() {
+        return category != null ? new Category(category.getId(), category.getName()) : null;
+    }
+
+    public User getInitiator() {
+        return initiator != null ? new User(initiator.getId(), initiator.getEmail(), initiator.getName()) : null;
+    }
+
+    public Location getLocation() {
+        return location != null ? new Location(location.getLat(), location.getLon()) : null;
+    }
+
+
+    public void setCategory(Category category) {
+        this.category = category != null ? new Category(category.getId(), category.getName()) : null;
+    }
+
+    public void setInitiator(User initiator) {
+        this.initiator = initiator != null ? new User(initiator.getId(), initiator.getEmail(), initiator.getName()) : null;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location != null ? new Location(location.getLat(), location.getLon()) : null;
+    }
 }
