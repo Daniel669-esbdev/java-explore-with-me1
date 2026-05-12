@@ -137,35 +137,91 @@ public class Event {
         private String title;
         private Long views;
 
-        public EventBuilder id(Long id) { this.id = id; return this; }
-        public EventBuilder annotation(String annotation) { this.annotation = annotation; return this; }
+        public EventBuilder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public EventBuilder annotation(String annotation) {
+            this.annotation = annotation;
+            return this;
+        }
+
         public EventBuilder category(Category category) {
             this.category = category != null ? new Category(category.getId(), category.getName()) : null;
             return this;
         }
-        public EventBuilder confirmedRequests(Integer confirmedRequests) { this.confirmedRequests = confirmedRequests; return this; }
-        public EventBuilder createdOn(LocalDateTime createdOn) { this.createdOn = createdOn; return this; }
-        public EventBuilder description(String description) { this.description = description; return this; }
-        public EventBuilder eventDate(LocalDateTime eventDate) { this.eventDate = eventDate; return this; }
-        public EventBuilder initiator(User initiator) {
-            this.initiator = initiator != null ? new User(initiator.getId(), initiator.getEmail(), initiator.getName()) : null;
+
+        public EventBuilder confirmedRequests(Integer confirmedRequests) {
+            this.confirmedRequests = confirmedRequests;
             return this;
         }
+
+        public EventBuilder createdOn(LocalDateTime createdOn) {
+            this.createdOn = createdOn;
+            return this;
+        }
+
+        public EventBuilder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public EventBuilder eventDate(LocalDateTime eventDate) {
+            this.eventDate = eventDate;
+            return this;
+        }
+
+        public EventBuilder initiator(User initiator) {
+            this.initiator = initiator != null
+                    ? new User(initiator.getId(), initiator.getEmail(), initiator.getName()) : null;
+            return this;
+        }
+
         public EventBuilder location(Location location) {
             this.location = location != null ? new Location(location.getLat(), location.getLon()) : null;
             return this;
         }
-        public EventBuilder paid(Boolean paid) { this.paid = paid; return this; }
-        public EventBuilder participantLimit(Integer participantLimit) { this.participantLimit = participantLimit; return this; }
-        public EventBuilder publishedOn(LocalDateTime publishedOn) { this.publishedOn = publishedOn; return this; }
-        public EventBuilder requestModeration(Boolean requestModeration) { this.requestModeration = requestModeration; return this; }
-        public EventBuilder state(EventState state) { this.state = state; return this; }
-        public EventBuilder title(String title) { this.title = title; return this; }
-        public EventBuilder views(Long views) { this.views = views; return this; }
+
+        public EventBuilder paid(Boolean paid) {
+            this.paid = paid;
+            return this;
+        }
+
+        public EventBuilder participantLimit(Integer participantLimit) {
+            this.participantLimit = participantLimit;
+            return this;
+        }
+
+        public EventBuilder publishedOn(LocalDateTime publishedOn) {
+            this.publishedOn = publishedOn;
+            return this;
+        }
+
+        public EventBuilder requestModeration(Boolean requestModeration) {
+            this.requestModeration = requestModeration;
+            return this;
+        }
+
+        public EventBuilder state(EventState state) {
+            this.state = state;
+            return this;
+        }
+
+        public EventBuilder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public EventBuilder views(Long views) {
+            this.views = views;
+            return this;
+        }
 
         public Event build() {
-            return new Event(id, annotation, category, confirmedRequests, createdOn, description, eventDate,
-                    initiator, location, paid, participantLimit, publishedOn, requestModeration, state, title, views);
+            return new Event(id, annotation, category, confirmedRequests, createdOn, description,
+                    eventDate, initiator, location, paid, participantLimit, publishedOn,
+                    requestModeration, state, title, views);
         }
     }
 }
