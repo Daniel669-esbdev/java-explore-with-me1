@@ -1,40 +1,29 @@
 services:
-  stats-db:
-    image: postgres:16.1
-    container_name: stats-db
-    environment:
-      - POSTGRES_DB=stats
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d stats"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   stats-server:
-    build:
-      context: ./stats/stats-server
-      dockerfile: Dockerfile
-    container_name: stats-server
+    build: ./ewm-stats-service/ewm-stats-server
     ports:
       - "9090:9090"
     depends_on:
-      stats-db:
-        condition: service_healthy
+      - stats-db
+
+  stats-db:
+    image: postgres:16.1
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      POSTGRES_DB: stats
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
 
   ewm-service:
-    build:
-      context: ./ewm-main-service
-      dockerfile: Dockerfile
-    container_name: ewm-main-service
+    build: ./ewm-main-service
     ports:
       - "8080:8080"
     depends_on:
+      - ewm-db
       - stats-server
+
+  ewm-db:
+    image: postgres:16.1
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
+      POSTGRES_DB: ewm
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
