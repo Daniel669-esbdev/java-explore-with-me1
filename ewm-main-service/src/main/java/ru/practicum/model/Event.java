@@ -1,7 +1,6 @@
 package ru.practicum.model;
 
 import lombok.*;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -10,7 +9,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class Event {
 
@@ -61,4 +59,55 @@ public class Event {
 
     @Column(nullable = false)
     private Long views = 0L;
+
+    public Event(Long id, String annotation, Category category, Integer confirmedRequests, String description,
+                 LocalDateTime eventDate, Long initiatorId, Location location, Boolean paid, Integer participantLimit,
+                 LocalDateTime publishedOn, Boolean requestModeration, EventState state, String title, Long views) {
+        this.id = id;
+        this.annotation = annotation;
+        this.category = category == null ? null : new Category(category.getId(), category.getName());
+        this.confirmedRequests = confirmedRequests;
+        this.description = description;
+        this.eventDate = eventDate;
+        this.initiatorId = initiatorId;
+        this.location = location == null ? null : new Location(location.getLat(), location.getLon());
+        this.paid = paid;
+        this.participantLimit = participantLimit;
+        this.publishedOn = publishedOn;
+        this.requestModeration = requestModeration;
+        this.state = state;
+        this.title = title;
+        this.views = views;
+    }
+
+    public Category getCategory() {
+        return category == null ? null : new Category(category.getId(), category.getName());
+    }
+
+    public void setCategory(Category category) {
+        this.category = category == null ? null : new Category(category.getId(), category.getName());
+    }
+
+    public Location getLocation() {
+        return location == null ? null : new Location(location.getLat(), location.getLon());
+    }
+
+    public void setLocation(Location location) {
+        this.location = location == null ? null : new Location(location.getLat(), location.getLon());
+    }
+
+    public static class EventBuilder {
+        private Category category;
+        private Location location;
+
+        public EventBuilder category(Category category) {
+            this.category = category == null ? null : new Category(category.getId(), category.getName());
+            return this;
+        }
+
+        public EventBuilder location(Location location) {
+            this.location = location == null ? null : new Location(location.getLat(), location.getLon());
+            return this;
+        }
+    }
 }

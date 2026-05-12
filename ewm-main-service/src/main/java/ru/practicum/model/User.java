@@ -1,7 +1,6 @@
 package ru.practicum.model;
 
 import lombok.*;
-
 import javax.persistence.*;
 
 @Entity
@@ -9,7 +8,6 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class User {
 
@@ -22,4 +20,10 @@ public class User {
 
     @Column(nullable = false, length = 256)
     private String name;
+
+    public User(Long id, String email, String name) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+    }
 }

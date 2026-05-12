@@ -1,7 +1,6 @@
 package ru.practicum.model;
 
 import lombok.*;
-
 import javax.persistence.*;
 
 @Entity
@@ -9,7 +8,6 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class Category {
 
@@ -19,4 +17,9 @@ public class Category {
 
     @Column(nullable = false, unique = true, length = 50)
     private String name;
+
+    public Category(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }
