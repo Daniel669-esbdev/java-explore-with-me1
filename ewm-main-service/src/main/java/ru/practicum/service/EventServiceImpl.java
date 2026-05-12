@@ -112,7 +112,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventPrivate(Long userId, Long eventId) {
-        return eventRepository.findByIdAndInitiatorId(eventId, userId)
+        return eventRepository.findByIdAndInitiator_Id(eventId, userId)
                 .map(eventMapper::toEventFullDto)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
     }
@@ -120,7 +120,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventFullDto updateEventPrivate(Long userId, Long eventId, UpdateEventUserRequest request) {
-        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
+        Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
 
         if (event.getState() == EventState.PUBLISHED) {
