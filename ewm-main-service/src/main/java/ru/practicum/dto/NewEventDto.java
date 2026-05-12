@@ -1,11 +1,17 @@
 package ru.practicum.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class NewEventDto {
     @NotBlank
     @Size(min = 20, max = 2000)
@@ -35,12 +41,4 @@ public class NewEventDto {
     @NotBlank
     @Size(min = 3, max = 120)
     private String title;
-
-    public LocationDto getLocation() {
-        return location != null ? LocationDto.builder().lat(location.getLat()).lon(location.getLon()).build() : null;
-    }
-
-    public void setLocation(LocationDto location) {
-        this.location = location != null ? LocationDto.builder().lat(location.getLat()).lon(location.getLon()).build() : null;
-    }
 }
