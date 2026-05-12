@@ -23,17 +23,30 @@ public class EventShortDto {
     private String title;
     private Long views;
 
-    public static class EventShortDtoBuilder {
-        private CategoryDto category;
-        private UserShortDto initiator;
+    public CategoryDto getCategory() {
+        return category != null ? CategoryDto.builder().id(category.getId()).name(category.getName()).build() : null;
+    }
 
+    public void setCategory(CategoryDto category) {
+        this.category = category != null ? CategoryDto.builder().id(category.getId()).name(category.getName()).build() : null;
+    }
+
+    public UserShortDto getInitiator() {
+        return initiator != null ? UserShortDto.builder().id(initiator.getId()).name(initiator.getName()).build() : null;
+    }
+
+    public void setInitiator(UserShortDto initiator) {
+        this.initiator = initiator != null ? UserShortDto.builder().id(initiator.getId()).name(initiator.getName()).build() : null;
+    }
+
+    public static class EventShortDtoBuilder {
         public EventShortDtoBuilder category(CategoryDto category) {
-            this.category = category;
+            this.category = category != null ? CategoryDto.builder().id(category.getId()).name(category.getName()).build() : null;
             return this;
         }
 
         public EventShortDtoBuilder initiator(UserShortDto initiator) {
-            this.initiator = initiator;
+            this.initiator = initiator != null ? UserShortDto.builder().id(initiator.getId()).name(initiator.getName()).build() : null;
             return this;
         }
     }

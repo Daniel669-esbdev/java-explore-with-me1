@@ -30,23 +30,43 @@ public class EventFullDto {
     private String title;
     private Long views;
 
-    public static class EventFullDtoBuilder {
-        private CategoryDto category;
-        private UserShortDto initiator;
-        private LocationDto location;
+    public CategoryDto getCategory() {
+        return category != null ? CategoryDto.builder().id(category.getId()).name(category.getName()).build() : null;
+    }
 
+    public void setCategory(CategoryDto category) {
+        this.category = category != null ? CategoryDto.builder().id(category.getId()).name(category.getName()).build() : null;
+    }
+
+    public UserShortDto getInitiator() {
+        return initiator != null ? UserShortDto.builder().id(initiator.getId()).name(initiator.getName()).build() : null;
+    }
+
+    public void setInitiator(UserShortDto initiator) {
+        this.initiator = initiator != null ? UserShortDto.builder().id(initiator.getId()).name(initiator.getName()).build() : null;
+    }
+
+    public LocationDto getLocation() {
+        return location != null ? LocationDto.builder().lat(location.getLat()).lon(location.getLon()).build() : null;
+    }
+
+    public void setLocation(LocationDto location) {
+        this.location = location != null ? LocationDto.builder().lat(location.getLat()).lon(location.getLon()).build() : null;
+    }
+
+    public static class EventFullDtoBuilder {
         public EventFullDtoBuilder category(CategoryDto category) {
-            this.category = category;
+            this.category = category != null ? CategoryDto.builder().id(category.getId()).name(category.getName()).build() : null;
             return this;
         }
 
         public EventFullDtoBuilder initiator(UserShortDto initiator) {
-            this.initiator = initiator;
+            this.initiator = initiator != null ? UserShortDto.builder().id(initiator.getId()).name(initiator.getName()).build() : null;
             return this;
         }
 
         public EventFullDtoBuilder location(LocationDto location) {
-            this.location = location;
+            this.location = location != null ? LocationDto.builder().lat(location.getLat()).lon(location.getLon()).build() : null;
             return this;
         }
     }
