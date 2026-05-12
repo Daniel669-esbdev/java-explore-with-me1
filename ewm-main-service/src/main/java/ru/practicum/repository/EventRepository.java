@@ -13,10 +13,10 @@ import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-    Optional<Event> findByIdAndInitiatorId(Long id, Long initiatorId);
+    Optional<Event> findByIdAndInitiator_Id(Long id, Long initiatorId);
 
     @Query("SELECT e FROM Event e " +
-            "WHERE (:users IS NULL OR e.initiatorId IN :users) " +
+            "WHERE (:users IS NULL OR e.initiator.id IN :users) " +
             "AND (:states IS NULL OR e.state IN :states) " +
             "AND (:categories IS NULL OR e.category.id IN :categories) " +
             "AND (CAST(:rangeStart AS timestamp) IS NULL OR e.eventDate >= :rangeStart) " +
