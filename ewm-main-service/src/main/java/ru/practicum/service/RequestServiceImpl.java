@@ -4,9 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.ParticipationRequestDto;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.model.ParticipationRequest;
+import ru.practicum.model.*;
+import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.RequestRepository;
+import ru.practicum.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,10 +20,15 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
+    private final EventRepository eventRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
-        return requestRepository.findAllByRequester(userId).stream()
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User with id=" + userId + " was not found");
+        }
+        return requestRepository.findAllByRequesterId(userId).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
@@ -28,21 +36,58 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
+        if (requestRepository.existsByRequesterIdAndEventId(userId, eventId)) {
+            throw new ConflictException("Could not add duplicate request");
+        }
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+
+        User requester = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
+
+        if (event.getInitiator().getId().equals(userId)) {
+            throw new ConflictException("Initiator cannot request participation in their own event");
+        }
+
+        if (event.getState() != EventState.PUBLISHED) {
+            throw new ConflictException("Cannot participate in an unpublished event");
+        }
+
+        if (event.getParticipantLimit() > 0 && event.getConfirmedRequests() >= event.getParticipantLimit()) {
+            throw new ConflictException("The participant limit has been reached");
+        }
+
         ParticipationRequest request = ParticipationRequest.builder()
                 .created(LocalDateTime.now())
-                .event(eventId)
-                .requester(userId)
-                .status("PENDING")
+                .event(event)
+                .requester(requester)
                 .build();
+
+        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
+            request.setStatus(RequestStatus.CONFIRMED);
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+            eventRepository.save(event);
+        } else {
+            request.setStatus(RequestStatus.PENDING);
+        }
+
         return toDto(requestRepository.save(request));
     }
 
     @Override
     @Transactional
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
-        ParticipationRequest request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException("Request not found"));
-        request.setStatus("CANCELED");
+        ParticipationRequest request = requestRepository.findByIdAndRequesterId(requestId, userId)
+                .orElseThrow(() -> new NotFoundException("Request with id=" + requestId + " was not found"));
+
+        if (request.getStatus() == RequestStatus.CONFIRMED) {
+            Event event = request.getEvent();
+            event.setConfirmedRequests(event.getConfirmedRequests() - 1);
+            eventRepository.save(event);
+        }
+
+        request.setStatus(RequestStatus.CANCELED);
         return toDto(requestRepository.save(request));
     }
 
@@ -50,9 +95,9 @@ public class RequestServiceImpl implements RequestService {
         return ParticipationRequestDto.builder()
                 .id(request.getId())
                 .created(request.getCreated())
-                .event(request.getEvent())
-                .requester(request.getRequester())
-                .status(request.getStatus())
+                .event(request.getEvent().getId())
+                .requester(request.getRequester().getId())
+                .status(request.getStatus().toString())
                 .build();
     }
 }
