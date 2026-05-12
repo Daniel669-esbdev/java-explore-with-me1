@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+
 import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 
@@ -26,6 +27,7 @@ public class NewEventDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
+    @NotNull
     private LocationDto location;
 
     private Boolean paid = false;
