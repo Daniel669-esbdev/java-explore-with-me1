@@ -36,4 +36,12 @@ public class UpdateEventUserRequest {
         SEND_TO_REVIEW,
         CANCEL_REVIEW
     }
+
+    public Location getLocation() {
+        return location != null ? new Location(location.getLat(), location.getLon()) : null;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location != null ? new Location(location.getLat(), location.getLon()) : null;
+    }
 }

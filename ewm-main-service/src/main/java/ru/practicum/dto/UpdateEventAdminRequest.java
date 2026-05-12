@@ -21,4 +21,12 @@ public class UpdateEventAdminRequest {
     public enum StateAction {
         PUBLISH_EVENT, REJECT_EVENT
     }
+
+    public LocationDto getLocation() {
+        return location != null ? new LocationDto(location.getLat(), location.getLon()) : null;
+    }
+
+    public void setLocation(LocationDto location) {
+        this.location = location != null ? new LocationDto(location.getLat(), location.getLon()) : null;
+    }
 }
