@@ -142,18 +142,6 @@ public class EventServiceImpl implements EventService {
 
         statsClient.saveHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
 
-        try {
-            List<ViewStatsDto> stats = statsClient.getStats(
-                    event.getPublishedOn(),
-                    LocalDateTime.now(),
-                    List.of(request.getRequestURI()),
-                    true
-            );
-            event.setViews(stats != null && !stats.isEmpty() ? stats.get(0).getHits() : 0L);
-        } catch (RuntimeException e) {
-            event.setViews(0L);
-        }
-
         return eventMapper.toEventFullDto(event);
     }
 

@@ -1,6 +1,5 @@
 package ru.practicum.mapper;
 
-import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.dto.EventFullDto;
@@ -10,13 +9,12 @@ import ru.practicum.model.Event;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", builder = @Builder(disableBuilder = true))
+@Mapper(componentModel = "spring")
 public interface EventMapper {
 
         @Mapping(target = "category", source = "category")
         @Mapping(target = "initiator", source = "initiator")
-        @Mapping(target = "location.lat", source = "location.lat")
-        @Mapping(target = "location.lon", source = "location.lon")
+        @Mapping(target = "location", source = "location")
         EventFullDto toEventFullDto(Event event);
 
         @Mapping(target = "category", source = "category")
@@ -31,10 +29,10 @@ public interface EventMapper {
         @Mapping(target = "views", ignore = true)
         @Mapping(target = "confirmedRequests", ignore = true)
         @Mapping(target = "createdOn", ignore = true)
-        @Mapping(target = "location", ignore = true)
+        @Mapping(target = "location.lat", source = "location.lat")
+        @Mapping(target = "location.lon", source = "location.lon")
         Event toEvent(NewEventDto newEventDto);
 
         List<EventShortDto> toEventShortDtoList(List<Event> events);
-
         List<EventFullDto> toEventFullDtoList(List<Event> events);
 }
