@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Sort;
 
 
 @Slf4j
@@ -112,15 +113,19 @@ public class EventServiceImpl implements EventService {
                                                Boolean onlyAvailable, String sort, int from, int size,
                                                HttpServletRequest request) {
 
-        if (rangeStart == null) {
-            rangeStart = LocalDateTime.now();
-        }
-
         if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
             throw new BadRequestException("RangeStart must be before RangeEnd");
         }
 
-        Pageable pageable = PageRequest.of(from / size, size);
+        if (rangeStart == null) {
+            rangeStart = LocalDateTime.now();
+        }
+
+        Sort sortOrder = "VIEWS".equalsIgnoreCase(sort)
+                ? Sort.by(Sort.Direction.DESC, "views")
+                : Sort.by(Sort.Direction.DESC, "eventDate");
+
+        Pageable pageable = PageRequest.of(from / size, size, sortOrder);
 
         List<Event> events = eventRepository.findEventsPublic(text, categories, paid, rangeStart, rangeEnd, pageable);
 
@@ -143,12 +148,28 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Event with id=" + id + " was not found"));
 
         if (event.getState() != EventState.PUBLISHED) {
-            throw new NotFoundException("Event must be published");
+            throw new NotFoundException("Event with id=" + id + " was not found");
         }
 
         statsClient.saveHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
 
-        return eventMapper.toEventFullDto(event);
+        EventFullDto dto = eventMapper.toEventFullDto(event);
+
+        try {
+            List<ViewStatsDto> stats = statsClient.getStats(
+                    LocalDateTime.now().minusYears(1),
+                    LocalDateTime.now(),
+                    List.of("/events/" + id),
+                    true);
+
+            long views = stats.isEmpty() ? 0L : stats.get(0).getHits();
+            dto.setViews(views);
+        } catch (Exception e) {
+            log.warn("Failed to get stats for event {}", id, e);
+            dto.setViews(0L);
+        }
+
+        return dto;
     }
 
     @Override
@@ -174,10 +195,10 @@ public class EventServiceImpl implements EventService {
             event.setLon(newEventDto.getLocation().getLon());
         }
 
+        event.setViews(0L);
+        event.setConfirmedRequests(0);
         event.setCreatedOn(LocalDateTime.now());
         event.setState(EventState.PENDING);
-        event.setConfirmedRequests(0);
-        event.setViews(0L);
 
         Event savedEvent = eventRepository.save(event);
         return eventMapper.toEventFullDto(savedEvent);

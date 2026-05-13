@@ -220,6 +220,22 @@ public class Event {
             return this;
         }
 
+        public EventBuilder lat(Float lat) {
+            if (this.location == null) {
+                this.location = new Location();
+            }
+            this.location.setLat(lat);
+            return this;
+        }
+
+        public EventBuilder lon(Float lon) {
+            if (this.location == null) {
+                this.location = new Location();
+            }
+            this.location.setLon(lon);
+            return this;
+        }
+
         public EventBuilder paid(Boolean paid) {
             this.paid = paid;
             return this;

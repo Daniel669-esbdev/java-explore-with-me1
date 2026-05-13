@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RequestServiceImpl implements RequestService {
+
     private final RequestRepository requestRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
@@ -40,15 +41,11 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
-        if (requestRepository.existsByRequesterIdAndEventId(userId, eventId)) {
-            throw new ConflictException("Could not add duplicate request");
-        }
+        User requester = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
-
-        User requester = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
 
         if (event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("Initiator cannot request participation in their own event");
@@ -58,24 +55,33 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Cannot participate in an unpublished event");
         }
 
-        if (event.getParticipantLimit() > 0
-                && event.getConfirmedRequests() >= event.getParticipantLimit()) {
+        if (requestRepository.existsByRequesterIdAndEventId(userId, eventId)) {
+            throw new ConflictException("Could not add duplicate request");
+        }
+
+        if (event.getParticipantLimit() > 0 && event.getConfirmedRequests() >= event.getParticipantLimit()) {
             throw new ConflictException("The participant limit has been reached");
         }
+
+        RequestStatus status = (!event.getRequestModeration() || event.getParticipantLimit() == 0)
+                ? RequestStatus.CONFIRMED
+                : RequestStatus.PENDING;
 
         ParticipationRequest request = ParticipationRequest.builder()
                 .created(LocalDateTime.now())
                 .event(event)
                 .requester(requester)
-                .status(determineStatus(event))
+                .status(status)
                 .build();
 
-        if (request.getStatus() == RequestStatus.CONFIRMED) {
+        ParticipationRequest savedRequest = requestRepository.save(request);
+
+        if (status == RequestStatus.CONFIRMED) {
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
             eventRepository.save(event);
         }
 
-        return toDto(requestRepository.save(request));
+        return toDto(savedRequest);
     }
 
     @Override
@@ -94,20 +100,13 @@ public class RequestServiceImpl implements RequestService {
         return toDto(requestRepository.save(request));
     }
 
-    private RequestStatus determineStatus(Event event) {
-        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
-            return RequestStatus.CONFIRMED;
-        }
-        return RequestStatus.PENDING;
-    }
-
     private ParticipationRequestDto toDto(ParticipationRequest request) {
         return ParticipationRequestDto.builder()
                 .id(request.getId())
                 .created(request.getCreated())
                 .event(request.getEvent().getId())
                 .requester(request.getRequester().getId())
-                .status(request.getStatus().toString())
+                .status(request.getStatus().name())
                 .build();
     }
 }

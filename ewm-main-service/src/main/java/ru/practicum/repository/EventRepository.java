@@ -17,6 +17,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findAllByInitiatorId(Long initiatorId, Pageable pageable);
 
+    boolean existsByCategoryId(Long categoryId);
+
     @Query("SELECT e FROM Event e " +
             "WHERE (:users IS NULL OR e.initiator.id IN :users) " +
             "AND (:states IS NULL OR e.state IN :states) " +
@@ -32,7 +34,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             Pageable pageable);
 
     @Query("SELECT e FROM Event e " +
-            "WHERE e.state = ru.practicum.model.EventState.PUBLISHED " +
+            "WHERE e.state = 'PUBLISHED' " +
             "AND (:text IS NULL OR (LOWER(e.annotation) LIKE LOWER(CONCAT('%', :text, '%')) " +
             "OR LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%')))) " +
             "AND (:categories IS NULL OR e.category.id IN :categories) " +

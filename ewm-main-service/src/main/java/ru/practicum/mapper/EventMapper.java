@@ -14,23 +14,29 @@ public interface EventMapper {
 
         @Mapping(target = "category", source = "category")
         @Mapping(target = "initiator", source = "initiator")
-        @Mapping(target = "location", source = "location")
+        @Mapping(target = "views", source = "views")
+        @Mapping(target = "confirmedRequests", source = "confirmedRequests")
+        @Mapping(target = "state", source = "state")
+        @Mapping(target = "createdOn", source = "createdOn")
+        @Mapping(target = "publishedOn", source = "publishedOn")
         EventFullDto toEventFullDto(Event event);
 
         @Mapping(target = "category", source = "category")
         @Mapping(target = "initiator", source = "initiator")
+        @Mapping(target = "views", source = "views")
+        @Mapping(target = "confirmedRequests", source = "confirmedRequests")
         EventShortDto toEventShortDto(Event event);
 
         @Mapping(target = "id", ignore = true)
-        @Mapping(target = "category", ignore = true)
         @Mapping(target = "initiator", ignore = true)
+        @Mapping(target = "category", ignore = true)
         @Mapping(target = "state", ignore = true)
         @Mapping(target = "publishedOn", ignore = true)
         @Mapping(target = "views", ignore = true)
         @Mapping(target = "confirmedRequests", ignore = true)
         @Mapping(target = "createdOn", ignore = true)
-        @Mapping(target = "location.lat", source = "location.lat")
-        @Mapping(target = "location.lon", source = "location.lon")
+        @Mapping(target = "lat", ignore = true)
+        @Mapping(target = "lon", ignore = true)
         Event toEvent(NewEventDto newEventDto);
 
         List<EventShortDto> toEventShortDtoList(List<Event> events);
