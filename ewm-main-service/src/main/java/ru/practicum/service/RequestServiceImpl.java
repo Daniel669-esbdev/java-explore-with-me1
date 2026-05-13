@@ -6,7 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.ParticipationRequestDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.model.*;
+import ru.practicum.model.Event;
+import ru.practicum.model.EventState;
+import ru.practicum.model.ParticipationRequest;
+import ru.practicum.model.RequestStatus;
+import ru.practicum.model.User;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.RequestRepository;
 import ru.practicum.repository.UserRepository;
@@ -54,7 +58,8 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Cannot participate in an unpublished event");
         }
 
-        if (event.getParticipantLimit() > 0 && event.getConfirmedRequests() >= event.getParticipantLimit()) {
+        if (event.getParticipantLimit() > 0
+                && event.getConfirmedRequests() >= event.getParticipantLimit()) {
             throw new ConflictException("The participant limit has been reached");
         }
 
@@ -62,14 +67,12 @@ public class RequestServiceImpl implements RequestService {
                 .created(LocalDateTime.now())
                 .event(event)
                 .requester(requester)
+                .status(determineStatus(event))
                 .build();
 
-        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
-            request.setStatus(RequestStatus.CONFIRMED);
+        if (request.getStatus() == RequestStatus.CONFIRMED) {
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
             eventRepository.save(event);
-        } else {
-            request.setStatus(RequestStatus.PENDING);
         }
 
         return toDto(requestRepository.save(request));
@@ -89,6 +92,13 @@ public class RequestServiceImpl implements RequestService {
 
         request.setStatus(RequestStatus.CANCELED);
         return toDto(requestRepository.save(request));
+    }
+
+    private RequestStatus determineStatus(Event event) {
+        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
+            return RequestStatus.CONFIRMED;
+        }
+        return RequestStatus.PENDING;
     }
 
     private ParticipationRequestDto toDto(ParticipationRequest request) {
