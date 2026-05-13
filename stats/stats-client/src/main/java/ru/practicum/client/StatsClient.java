@@ -2,13 +2,19 @@ package ru.practicum.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.EndpointHitDto;
+import ru.practicum.dto.ViewStatsDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class StatsClient {
@@ -32,5 +38,24 @@ public class StatsClient {
                 .build();
 
         restTemplate.postForLocation("/hit", hitDto);
+    }
+
+    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        Map<String, Object> parameters = Map.of(
+                "start", start.format(FORMATTER),
+                "end", end.format(FORMATTER),
+                "uris", String.join(",", uris),
+                "unique", unique
+        );
+
+        ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
+                "/stats?start={start}&end={end}&uris={uris}&unique={unique}",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<ViewStatsDto>>() {},
+                parameters
+        );
+
+        return response.getBody();
     }
 }

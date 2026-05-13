@@ -1,5 +1,6 @@
 package ru.practicum.mapper;
 
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.dto.EventFullDto;
@@ -9,7 +10,7 @@ import ru.practicum.model.Event;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", builder = @Builder(disableBuilder = true))
 public interface EventMapper {
 
     @Mapping(target = "category", source = "category")
@@ -24,12 +25,12 @@ public interface EventMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "initiator", ignore = true)
-    @Mapping(target = "location", source = "location")
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
     @Mapping(target = "views", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)
     @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "location", ignore = true)
     Event toEvent(NewEventDto newEventDto);
 
     List<EventShortDto> toEventShortDtoList(List<Event> events);

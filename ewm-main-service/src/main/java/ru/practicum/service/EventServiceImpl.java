@@ -39,7 +39,7 @@ public class EventServiceImpl implements EventService {
 
         if (request.getEventDate() != null) {
             if (request.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
-                throw new ConflictException("Дата начала события должна быть не ранее чем за час от даты публикации.");
+                throw new BadRequestException("Дата начала события должна быть не ранее чем за час от даты публикации.");
             }
             event.setEventDate(request.getEventDate());
         }
@@ -141,6 +141,19 @@ public class EventServiceImpl implements EventService {
         }
 
         statsClient.saveHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
+
+        List<ViewStatsDto> stats = statsClient.getStats(
+                event.getCreatedOn(),
+                LocalDateTime.now(),
+                List.of(request.getRequestURI()),
+                true
+        );
+
+        if (stats != null && !stats.isEmpty()) {
+            event.setViews(stats.get(0).getHits());
+        } else {
+            event.setViews(0L);
+        }
 
         return eventMapper.toEventFullDto(event);
     }
