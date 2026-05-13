@@ -44,7 +44,7 @@ public class EventServiceImpl implements EventService {
 
         if (request.getEventDate() != null) {
             if (request.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
-                throw new BadRequestException("Дата начала события должна быть не ранее чем за час от даты публикации.");
+                throw new ConflictException("Дата начала события должна быть не ранее чем за час от даты публикации.");
             }
             event.setEventDate(request.getEventDate());
         }
@@ -120,8 +120,9 @@ public class EventServiceImpl implements EventService {
             throw new BadRequestException("RangeStart must be before RangeEnd");
         }
 
-        List<Event> events = eventRepository.findEventsPublic(text, categories, paid, rangeStart, rangeEnd,
-                PageRequest.of(from / size, size));
+        Pageable pageable = PageRequest.of(from / size, size);
+
+        List<Event> events = eventRepository.findEventsPublic(text, categories, paid, rangeStart, rangeEnd, pageable);
 
         if (Boolean.TRUE.equals(onlyAvailable)) {
             events = events.stream()
@@ -178,7 +179,8 @@ public class EventServiceImpl implements EventService {
         event.setConfirmedRequests(0);
         event.setViews(0L);
 
-        return eventMapper.toEventFullDto(eventRepository.save(event));
+        Event savedEvent = eventRepository.save(event);
+        return eventMapper.toEventFullDto(savedEvent);
     }
 
     @Override

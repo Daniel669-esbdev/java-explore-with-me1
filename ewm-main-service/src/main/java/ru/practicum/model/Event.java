@@ -24,7 +24,7 @@ public class Event {
     @Setter(AccessLevel.NONE)
     private Category category;
 
-    @Column(name = "confirmed_requests")
+    @Column(name = "confirmed_requests", nullable = false)
     private Integer confirmedRequests = 0;
 
     @Column(name = "created_on")
@@ -50,13 +50,13 @@ public class Event {
     @Column(nullable = false)
     private Boolean paid = false;
 
-    @Column(name = "participant_limit")
+    @Column(name = "participant_limit", nullable = false)
     private Integer participantLimit = 0;
 
     @Column(name = "published_on")
     private LocalDateTime publishedOn;
 
-    @Column(name = "request_moderation")
+    @Column(name = "request_moderation", nullable = false)
     private Boolean requestModeration = true;
 
     @Enumerated(EnumType.STRING)
@@ -92,12 +92,16 @@ public class Event {
     }
 
     public void setLat(Float lat) {
-        if (this.location == null) this.location = new Location();
+        if (this.location == null) {
+            this.location = new Location();
+        }
         this.location.setLat(lat);
     }
 
     public void setLon(Float lon) {
-        if (this.location == null) this.location = new Location();
+        if (this.location == null) {
+            this.location = new Location();
+        }
         this.location.setLon(lon);
     }
 
