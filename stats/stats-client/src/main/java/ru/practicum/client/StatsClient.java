@@ -22,6 +22,9 @@ public class StatsClient {
     private final RestTemplate restTemplate;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    private static final ParameterizedTypeReference<List<ViewStatsDto>> STATS_TYPE_REFERENCE =
+            new ParameterizedTypeReference<List<ViewStatsDto>>() {};
+
     public StatsClient(@Value("${stats-server.url:http://localhost:9090}") String serverUrl,
                        RestTemplateBuilder builder) {
         this.restTemplate = builder
@@ -52,7 +55,7 @@ public class StatsClient {
                 "/stats?start={start}&end={end}&uris={uris}&unique={unique}",
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<List<ViewStatsDto>>() {},
+                STATS_TYPE_REFERENCE,
                 parameters
         );
 
