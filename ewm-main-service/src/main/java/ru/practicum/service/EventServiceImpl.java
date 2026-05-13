@@ -150,7 +150,7 @@ public class EventServiceImpl implements EventService {
                     true
             );
             event.setViews(stats != null && !stats.isEmpty() ? stats.get(0).getHits() : 0L);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             event.setViews(0L);
         }
 
