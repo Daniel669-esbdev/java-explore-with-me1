@@ -164,9 +164,6 @@ public class EventServiceImpl implements EventService {
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new BadRequestException("Event date must be at least 2 hours from now");
         }
-        if (newEventDto.getParticipantLimit() != null && newEventDto.getParticipantLimit() < 0) {
-            throw new BadRequestException("Participant limit cannot be negative");
-        }
 
         User initiator = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
@@ -175,8 +172,15 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Category with id=" + newEventDto.getCategory() + " was not found"));
 
         Event event = eventMapper.toEvent(newEventDto);
+
         event.setInitiator(initiator);
         event.setCategory(category);
+
+        if (newEventDto.getLocation() != null) {
+            event.setLat(newEventDto.getLocation().getLat());
+            event.setLon(newEventDto.getLocation().getLon());
+        }
+
         event.setCreatedOn(LocalDateTime.now());
         event.setState(EventState.PENDING);
         event.setConfirmedRequests(0);

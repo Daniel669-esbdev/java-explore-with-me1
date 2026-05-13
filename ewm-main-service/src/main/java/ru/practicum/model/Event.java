@@ -75,13 +75,13 @@ public class Event {
                  Boolean requestModeration, EventState state, String title, Long views) {
         this.id = id;
         this.annotation = annotation;
-        this.setCategory(category);
+        this.category = category;
         this.confirmedRequests = confirmedRequests;
         this.createdOn = createdOn;
         this.description = description;
         this.eventDate = eventDate;
-        this.setInitiator(initiator);
-        this.setLocation(location);
+        this.initiator = initiator;
+        this.location = location;
         this.paid = paid;
         this.participantLimit = participantLimit;
         this.publishedOn = publishedOn;
@@ -102,27 +102,27 @@ public class Event {
     }
 
     public Category getCategory() {
-        return category != null ? new Category(category.getId(), category.getName()) : null;
+        return category;
     }
 
     public void setCategory(Category category) {
-        this.category = category != null ? new Category(category.getId(), category.getName()) : null;
+        this.category = category;
     }
 
     public User getInitiator() {
-        return initiator != null ? new User(initiator.getId(), initiator.getEmail(), initiator.getName()) : null;
+        return initiator;
     }
 
     public void setInitiator(User initiator) {
-        this.initiator = initiator != null ? new User(initiator.getId(), initiator.getEmail(), initiator.getName()) : null;
+        this.initiator = initiator;
     }
 
     public Location getLocation() {
-        return location != null ? new Location(location.getLat(), location.getLon()) : null;
+        return location;
     }
 
     public void setLocation(Location location) {
-        this.location = location != null ? new Location(location.getLat(), location.getLon()) : null;
+        this.location = location;
     }
 
     @Override
@@ -182,8 +182,7 @@ public class Event {
         }
 
         public EventBuilder category(Category category) {
-            this.category = (category == null) ? null :
-                    new Category(category.getId(), category.getName());
+            this.category = category;
             return this;
         }
 
@@ -208,14 +207,12 @@ public class Event {
         }
 
         public EventBuilder initiator(User initiator) {
-            this.initiator = (initiator == null) ? null :
-                    new User(initiator.getId(), initiator.getEmail(), initiator.getName());
+            this.initiator = initiator;
             return this;
         }
 
         public EventBuilder location(Location location) {
-            this.location = (location == null) ? null :
-                    new Location(location.getLat(), location.getLon());
+            this.location = location;
             return this;
         }
 
