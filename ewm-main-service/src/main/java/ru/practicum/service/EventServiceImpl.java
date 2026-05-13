@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.client.StatsClient;
 import ru.practicum.dto.*;
+import java.util.Map;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
@@ -243,10 +245,43 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("User with id=" + userId + " was not found");
         }
 
-        List<Event> events = eventRepository.findAllByInitiatorId(userId, PageRequest.of(from / size, size));
+        Pageable pageable = PageRequest.of(from / size, size);
+        List<Event> events = eventRepository.findAllByInitiatorId(userId, pageable);
+
+        setViews(events);
 
         return events.stream()
                 .map(eventMapper::toEventShortDto)
                 .collect(Collectors.toList());
+    }
+
+    private void setViews(List<Event> events) {
+        if (events == null || events.isEmpty()) {
+            return;
+        }
+
+        LocalDateTime start = events.stream()
+                .map(Event::getCreatedOn)
+                .min(LocalDateTime::compareTo)
+                .orElse(LocalDateTime.now().minusYears(1));
+
+        List<String> uris = events.stream()
+                .map(event -> "/events/" + event.getId())
+                .collect(Collectors.toList());
+
+        try {
+            List<ViewStatsDto> stats = statsClient.getStats(start, LocalDateTime.now(), uris, true);
+            if (stats != null && !stats.isEmpty()) {
+                Map<String, Long> viewsMap = stats.stream()
+                        .collect(Collectors.toMap(ViewStatsDto::getUri, ViewStatsDto::getHits));
+
+                events.forEach(event -> {
+                    String key = "/events/" + event.getId();
+                    event.setViews(viewsMap.getOrDefault(key, 0L));
+                });
+            }
+        } catch (RuntimeException e) {
+            events.forEach(event -> event.setViews(0L));
+        }
     }
 }
