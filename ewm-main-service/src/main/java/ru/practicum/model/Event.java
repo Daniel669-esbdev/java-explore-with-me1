@@ -125,6 +125,30 @@ public class Event {
         this.location = location != null ? new Location(location.getLat(), location.getLon()) : null;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Event)) return false;
+        Event event = (Event) o;
+        return id != null && id.equals(event.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", state=" + state +
+                ", eventDate=" + eventDate +
+                ", views=" + views +
+                '}';
+    }
+
     public static EventBuilder builder() {
         return new EventBuilder();
     }

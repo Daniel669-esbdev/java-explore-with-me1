@@ -74,7 +74,14 @@ public class EventServiceImpl implements EventService {
         if (request.getDescription() != null) event.setDescription(request.getDescription());
         if (request.getTitle() != null) event.setTitle(request.getTitle());
         if (request.getPaid() != null) event.setPaid(request.getPaid());
-        if (request.getParticipantLimit() != null) event.setParticipantLimit(request.getParticipantLimit());
+
+        if (request.getParticipantLimit() != null) {
+            if (request.getParticipantLimit() < 0) {
+                throw new BadRequestException("Participant limit cannot be negative");
+            }
+            event.setParticipantLimit(request.getParticipantLimit());
+        }
+
         if (request.getRequestModeration() != null) event.setRequestModeration(request.getRequestModeration());
 
         return eventMapper.toEventFullDto(eventRepository.save(event));
@@ -99,6 +106,10 @@ public class EventServiceImpl implements EventService {
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                Boolean onlyAvailable, String sort, int from, int size,
                                                HttpServletRequest request) {
+
+        if (rangeStart == null && rangeEnd == null) {
+            rangeStart = LocalDateTime.now();
+        }
 
         if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
             throw new BadRequestException("RangeStart must be before RangeEnd");
@@ -139,6 +150,9 @@ public class EventServiceImpl implements EventService {
     public EventFullDto addEventPrivate(Long userId, NewEventDto newEventDto) {
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new BadRequestException("Event date must be at least 2 hours from now");
+        }
+        if (newEventDto.getParticipantLimit() != null && newEventDto.getParticipantLimit() < 0) {
+            throw new BadRequestException("Participant limit cannot be negative");
         }
 
         User initiator = userRepository.findById(userId)
@@ -206,7 +220,14 @@ public class EventServiceImpl implements EventService {
         if (request.getDescription() != null) event.setDescription(request.getDescription());
         if (request.getTitle() != null) event.setTitle(request.getTitle());
         if (request.getPaid() != null) event.setPaid(request.getPaid());
-        if (request.getParticipantLimit() != null) event.setParticipantLimit(request.getParticipantLimit());
+
+        if (request.getParticipantLimit() != null) {
+            if (request.getParticipantLimit() < 0) {
+                throw new BadRequestException("Participant limit cannot be negative");
+            }
+            event.setParticipantLimit(request.getParticipantLimit());
+        }
+
         if (request.getRequestModeration() != null) event.setRequestModeration(request.getRequestModeration());
 
         return eventMapper.toEventFullDto(eventRepository.save(event));
