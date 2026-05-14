@@ -11,6 +11,8 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStatsDto;
+import java.util.Map;
+import java.util.HashMap;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -46,18 +48,23 @@ public class StatsClient {
 
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         String url = UriComponentsBuilder.fromUriString("/stats")
-                .queryParam("start", start.format(FORMATTER))
-                .queryParam("end", end.format(FORMATTER))
+                .queryParam("start", "{start}")
+                .queryParam("end", "{end}")
                 .queryParam("uris", uris)
                 .queryParam("unique", unique)
-                .build()
+                .encode()
                 .toUriString();
+
+        Map<String, Object> uriVariables = new HashMap<>();
+        uriVariables.put("start", start.format(FORMATTER));
+        uriVariables.put("end", end.format(FORMATTER));
 
         ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 null,
-                STATS_TYPE_REFERENCE
+                STATS_TYPE_REFERENCE,
+                uriVariables
         );
 
         return response.getBody();
