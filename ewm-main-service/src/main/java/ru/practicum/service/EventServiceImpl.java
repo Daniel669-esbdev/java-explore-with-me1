@@ -48,7 +48,7 @@ public class EventServiceImpl implements EventService {
 
         if (request.getEventDate() != null) {
             if (request.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
-                throw new ConflictException("Field: eventDate. Error: должно содержать дату, которая еще не наступила");
+                throw new BadRequestException("Field: eventDate. Error: должно содержать дату, которая еще не наступила");
             }
             event.setEventDate(request.getEventDate());
         }
@@ -169,8 +169,8 @@ public class EventServiceImpl implements EventService {
 
         try {
             List<ViewStatsDto> stats = statsClient.getStats(
-                    LocalDateTime.now().minusYears(1),
-                    LocalDateTime.now(),
+                    LocalDateTime.now().minusYears(10),
+                    LocalDateTime.now().plusSeconds(1),
                     List.of("/events/" + id),
                     true);
 
