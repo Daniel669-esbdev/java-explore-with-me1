@@ -33,6 +33,7 @@ public class RequestServiceImpl implements RequestService {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("User with id=" + userId + " was not found");
         }
+
         return requestRepository.findAllByRequesterId(userId).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
@@ -89,6 +90,10 @@ public class RequestServiceImpl implements RequestService {
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         ParticipationRequest request = requestRepository.findByIdAndRequesterId(requestId, userId)
                 .orElseThrow(() -> new NotFoundException("Request with id=" + requestId + " was not found"));
+
+        if (request.getStatus() == RequestStatus.CONFIRMED) {
+            throw new ConflictException("Cannot cancel confirmed request");
+        }
 
         if (request.getStatus() == RequestStatus.CONFIRMED) {
             Event event = request.getEvent();
