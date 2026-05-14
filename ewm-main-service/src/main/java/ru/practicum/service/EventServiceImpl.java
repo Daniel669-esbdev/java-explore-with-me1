@@ -117,9 +117,7 @@ public class EventServiceImpl implements EventService {
             throw new BadRequestException("RangeStart must be before RangeEnd");
         }
 
-        if (rangeStart == null) {
-            rangeStart = LocalDateTime.now();
-        }
+        List<Long> categoryIds = (categories != null && categories.isEmpty()) ? null : categories;
 
         Sort sortOrder = "VIEWS".equalsIgnoreCase(sort)
                 ? Sort.by(Sort.Direction.DESC, "views")
@@ -127,7 +125,7 @@ public class EventServiceImpl implements EventService {
 
         Pageable pageable = PageRequest.of(from / size, size, sortOrder);
 
-        List<Event> events = eventRepository.findEventsPublic(text, categories, paid, rangeStart, rangeEnd, pageable);
+        List<Event> events = eventRepository.findEventsPublic(text, categoryIds, paid, rangeStart, rangeEnd, pageable);
 
         if (Boolean.TRUE.equals(onlyAvailable)) {
             events = events.stream()
