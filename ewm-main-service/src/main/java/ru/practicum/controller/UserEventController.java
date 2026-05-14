@@ -2,6 +2,7 @@ package ru.practicum.controller;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/users/{userId}/events")
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class UserEventController {
             @PathVariable Long userId,
             @PositiveOrZero @RequestParam(defaultValue = "0") int from,
             @Positive @RequestParam(defaultValue = "10") int size) {
+        log.info("GET /users/{}/events: from={}, size={}", userId, from, size);
         return eventService.getEventsPrivate(userId, from, size);
     }
 
@@ -34,6 +37,7 @@ public class UserEventController {
     public EventFullDto addEvent(
             @PathVariable Long userId,
             @Valid @RequestBody NewEventDto newEventDto) {
+        log.info("POST /users/{}/events: {}", userId, newEventDto);
         return eventService.addEventPrivate(userId, newEventDto);
     }
 
@@ -41,6 +45,7 @@ public class UserEventController {
     public EventFullDto getEvent(
             @PathVariable Long userId,
             @PathVariable Long eventId) {
+        log.info("GET /users/{}/events/{}", userId, eventId);
         return eventService.getEventPrivate(userId, eventId);
     }
 
@@ -49,6 +54,7 @@ public class UserEventController {
             @PathVariable Long userId,
             @PathVariable Long eventId,
             @Valid @RequestBody UpdateEventUserRequest updateRequest) {
+        log.info("PATCH /users/{}/events/{}: {}", userId, eventId, updateRequest);
         return eventService.updateEventPrivate(userId, eventId, updateRequest);
     }
 
@@ -56,6 +62,7 @@ public class UserEventController {
     public List<ParticipationRequestDto> getEventRequests(
             @PathVariable Long userId,
             @PathVariable Long eventId) {
+        log.info("GET /users/{}/events/{}/requests", userId, eventId);
         return eventService.getEventRequests(userId, eventId);
     }
 
@@ -64,6 +71,7 @@ public class UserEventController {
             @PathVariable Long userId,
             @PathVariable Long eventId,
             @RequestBody EventRequestStatusUpdateRequest updateRequest) {
+        log.info("PATCH /users/{}/events/{}/requests: {}", userId, eventId, updateRequest);
         return eventService.updateEventRequestStatus(userId, eventId, updateRequest);
     }
 }

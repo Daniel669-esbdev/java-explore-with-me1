@@ -1,6 +1,7 @@
 package ru.practicum.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import ru.practicum.repository.CategoryRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -23,43 +25,62 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto addCategory(NewCategoryDto newCategoryDto) {
+        log.info("Adding new category: name={}", newCategoryDto.getName());
         Category category = Category.builder()
                 .name(newCategoryDto.getName())
                 .build();
-        return toCategoryDto(repository.save(category));
+        Category savedCategory = repository.save(category);
+        log.info("Category saved with id={}", savedCategory.getId());
+        return toCategoryDto(savedCategory);
     }
 
     @Override
     @Transactional
     public void deleteCategory(Long catId) {
+        log.info("Deleting category with id={}", catId);
         if (!repository.existsById(catId)) {
+            log.error("Category with id={} not found for deletion", catId);
             throw new NotFoundException("Category with id=" + catId + " was not found");
         }
         repository.deleteById(catId);
+        log.info("Category with id={} deleted", catId);
     }
 
     @Override
     @Transactional
     public CategoryDto updateCategory(Long catId, NewCategoryDto newCategoryDto) {
+        log.info("Updating category with id={}: newName={}", catId, newCategoryDto.getName());
         Category category = repository.findById(catId)
-                .orElseThrow(() -> new NotFoundException("Category with id=" + catId + " was not found"));
+                .orElseThrow(() -> {
+                    log.error("Category with id={} not found for update", catId);
+                    return new NotFoundException("Category with id=" + catId + " was not found");
+                });
 
         category.setName(newCategoryDto.getName());
-        return toCategoryDto(repository.save(category));
+        Category updatedCategory = repository.save(category);
+        log.info("Category with id={} updated", catId);
+        return toCategoryDto(updatedCategory);
     }
 
     @Override
     public List<CategoryDto> getCategories(int from, int size) {
+        log.info("Fetching categories: from={}, size={}", from, size);
         PageRequest page = PageRequest.of(from / size, size);
-        return repository.findAll(page).getContent().stream()
+        List<Category> categories = repository.findAll(page).getContent();
+        log.info("Found {} categories", categories.size());
+        return categories.stream()
                 .map(this::toCategoryDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public CategoryDto getCategory(Long catId) {
+        log.info("Fetching category with id={}", catId);
         Category category = repository.findById(catId)
-                .orElseThrow(() -> new NotFoundException("Category with id=" + catId + " was not found"));
+                .orElseThrow(() -> {
+                    log.error("Category with id={} not found", catId);
+                    return new NotFoundException("Category with id=" + catId + " was not found");
+                });
         return toCategoryDto(category);
     }
 

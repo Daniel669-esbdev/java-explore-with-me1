@@ -2,6 +2,7 @@ package ru.practicum.controller;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import ru.practicum.service.RequestService;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/users/{userId}/requests")
 @RequiredArgsConstructor
@@ -20,6 +22,7 @@ public class ParticipationRequestController {
 
     @GetMapping
     public List<ParticipationRequestDto> getRequests(@PathVariable Long userId) {
+        log.info("GET /users/{}/requests", userId);
         return requestService.getUserRequests(userId);
     }
 
@@ -28,6 +31,7 @@ public class ParticipationRequestController {
     public ParticipationRequestDto addRequest(
             @PathVariable Long userId,
             @RequestParam Long eventId) {
+        log.info("POST /users/{}/requests: eventId={}", userId, eventId);
         return requestService.addRequest(userId, eventId);
     }
 
@@ -35,6 +39,7 @@ public class ParticipationRequestController {
     public ParticipationRequestDto cancelRequest(
             @PathVariable Long userId,
             @PathVariable Long requestId) {
+        log.info("PATCH /users/{}/requests/{}/cancel", userId, requestId);
         return requestService.cancelRequest(userId, requestId);
     }
 }
