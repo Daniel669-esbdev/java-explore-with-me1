@@ -106,7 +106,7 @@ public class Event {
     }
 
     public Category getCategory() {
-        return this.category;
+        return category != null ? new Category(category.getId(), category.getName()) : null;
     }
 
     public void setCategory(Category category) {
@@ -114,7 +114,7 @@ public class Event {
     }
 
     public User getInitiator() {
-        return this.initiator;
+        return initiator != null ? new User(initiator.getId(), initiator.getEmail(), initiator.getName()) : null;
     }
 
     public void setInitiator(User initiator) {
