@@ -11,8 +11,6 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStatsDto;
-import java.util.Map;
-import java.util.HashMap;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
