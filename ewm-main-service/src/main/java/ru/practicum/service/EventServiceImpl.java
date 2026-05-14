@@ -202,13 +202,13 @@ public class EventServiceImpl implements EventService {
             log.info("Fetching stats for eventId={}", id);
             List<ViewStatsDto> stats = statsClient.getStats(
                     event.getCreatedOn().minusSeconds(1),
-                    LocalDateTime.now().plusSeconds(1),
+                    LocalDateTime.now().plusSeconds(5),
                     List.of(request.getRequestURI()),
                     true);
 
-            long views = stats.isEmpty() ? 0L : stats.get(0).getHits();
+            long views = (stats != null && !stats.isEmpty()) ? stats.get(0).getHits() : 0L;
             dto.setViews(views);
-            log.info("EventId={} has {} views", id, views);
+            log.info("EventId={} views updated to: {}", id, views);
         } catch (Exception e) {
             log.warn("Failed to get stats for event id={}: {}", id, e.getMessage());
             dto.setViews(0L);
