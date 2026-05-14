@@ -47,26 +47,23 @@ public class StatsClient {
     }
 
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        String url = UriComponentsBuilder.fromUriString("/stats")
-                .queryParam("start", "{start}")
-                .queryParam("end", "{end}")
-                .queryParam("uris", uris)
-                .queryParam("unique", unique)
-                .encode()
-                .toUriString();
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("/stats")
+                .queryParam("start", start.format(FORMATTER))
+                .queryParam("end", end.format(FORMATTER))
+                .queryParam("unique", unique);
 
-        Map<String, Object> uriVariables = new HashMap<>();
-        uriVariables.put("start", start.format(FORMATTER));
-        uriVariables.put("end", end.format(FORMATTER));
+        if (uris != null && !uris.isEmpty()) {
+            uris.forEach(uri -> builder.queryParam("uris", uri));
+        }
+
+        String url = builder.build().toUriString();
 
         ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 null,
-                STATS_TYPE_REFERENCE,
-                uriVariables
+                STATS_TYPE_REFERENCE
         );
-
         return response.getBody();
     }
 }
