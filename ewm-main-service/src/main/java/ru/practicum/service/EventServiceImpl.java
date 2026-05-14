@@ -189,7 +189,6 @@ public class EventServiceImpl implements EventService {
         }
 
         try {
-            log.info("Sending hit to stats for eventId={}: uri={}, ip={}", id, request.getRequestURI(), request.getRemoteAddr());
             statsClient.saveHit("ewm-main-service", request.getRequestURI(),
                     request.getRemoteAddr(), LocalDateTime.now());
         } catch (Exception e) {
@@ -361,6 +360,7 @@ public class EventServiceImpl implements EventService {
         }
 
         log.info("Setting views for {} events", events.size());
+
         LocalDateTime start = events.stream()
                 .map(Event::getCreatedOn)
                 .min(LocalDateTime::compareTo)
@@ -371,7 +371,7 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
 
         try {
-            List<ViewStatsDto> stats = statsClient.getStats(start, LocalDateTime.now().plusSeconds(1), uris, true);
+            List<ViewStatsDto> stats = statsClient.getStats(start, LocalDateTime.now().plusMinutes(1), uris, true);
 
             if (stats != null && !stats.isEmpty()) {
                 Map<String, Long> viewsMap = stats.stream()
@@ -381,8 +381,10 @@ public class EventServiceImpl implements EventService {
                     String key = "/events/" + event.getId();
                     event.setViews(viewsMap.getOrDefault(key, 0L));
                 });
+            } else {
+                events.forEach(event -> event.setViews(0L));
             }
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             log.warn("Error retrieving stats for event list: {}", e.getMessage());
             events.forEach(event -> event.setViews(0L));
         }
