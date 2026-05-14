@@ -3,27 +3,29 @@ package ru.practicum.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.client.StatsClient;
 import ru.practicum.dto.*;
-import java.util.Map;
-import org.springframework.data.domain.Pageable;
 import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.EventMapper;
+import ru.practicum.mapper.RequestMapper;
 import ru.practicum.model.*;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
+import ru.practicum.repository.RequestRepository;
 import ru.practicum.repository.UserRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.data.domain.Sort;
-
 
 @Slf4j
 @Service
@@ -34,6 +36,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final RequestRepository requestRepository;
     private final StatsClient statsClient;
     private final EventMapper eventMapper;
 
@@ -316,6 +319,74 @@ public class EventServiceImpl implements EventService {
             }
         } catch (RuntimeException e) {
             events.forEach(event -> event.setViews(0L));
+        }
+    }
+
+    @Override
+    public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
+        checkUserExists(userId);
+        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+
+        return requestRepository.findAllByEventId(eventId).stream()
+                .map(RequestMapper::toParticipationRequestDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public EventRequestStatusUpdateResult updateEventRequestStatus(
+            Long userId, Long eventId, EventRequestStatusUpdateRequest updateRequest) {
+
+        checkUserExists(userId);
+        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+
+        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
+            return EventRequestStatusUpdateResult.builder()
+                    .confirmedRequests(new ArrayList<>())
+                    .rejectedRequests(new ArrayList<>())
+                    .build();
+        }
+
+        if (event.getConfirmedRequests() >= event.getParticipantLimit()) {
+            throw new ConflictException("The participant limit has been reached");
+        }
+
+        List<ParticipationRequest> requests = requestRepository.findAllById(updateRequest.getRequestIds());
+
+        for (ParticipationRequest request : requests) {
+            if (!request.getStatus().equals(RequestStatus.PENDING)) {
+                throw new ConflictException("Request must have status PENDING");
+            }
+        }
+
+        List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
+        List<ParticipationRequestDto> rejectedRequests = new ArrayList<>();
+
+        if (updateRequest.getStatus().equals(RequestStatus.REJECTED)) {
+            requests.forEach(r -> r.setStatus(RequestStatus.REJECTED));
+            rejectedRequests = requestRepository.saveAll(requests).stream()
+                    .map(RequestMapper::toParticipationRequestDto).collect(Collectors.toList());
+        } else {
+            for (ParticipationRequest request : requests) {
+                if (event.getConfirmedRequests() < event.getParticipantLimit()) {
+                    request.setStatus(RequestStatus.CONFIRMED);
+                    event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+                    confirmedRequests.add(RequestMapper.toParticipationRequestDto(requestRepository.save(request)));
+                } else {
+                    request.setStatus(RequestStatus.REJECTED);
+                    rejectedRequests.add(RequestMapper.toParticipationRequestDto(requestRepository.save(request)));
+                }
+            }
+        }
+
+        return new EventRequestStatusUpdateResult(confirmedRequests, rejectedRequests);
+    }
+
+    private void checkUserExists(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User with id=" + userId + " was not found");
         }
     }
 }
