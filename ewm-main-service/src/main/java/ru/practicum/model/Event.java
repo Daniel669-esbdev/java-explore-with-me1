@@ -1,5 +1,6 @@
 package ru.practicum.model;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -9,6 +10,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"},
+        justification = "Entity fields are managed by Hibernate")
 public class Event {
 
     @Id
