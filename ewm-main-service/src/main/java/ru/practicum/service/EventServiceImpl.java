@@ -188,30 +188,19 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Event with id=" + id + " was not found");
         }
 
-        try {
-            statsClient.saveHit("ewm-main-service", request.getRequestURI(),
-                    request.getRemoteAddr(), LocalDateTime.now());
-        } catch (Exception e) {
-            log.warn("Failed to save hit for eventId={}: {}", id, e.getMessage());
-        }
+        statsClient.saveHit("ewm-main-service", request.getRequestURI(),
+                request.getRemoteAddr(), LocalDateTime.now());
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
 
-        try {
-            log.info("Fetching stats for eventId={}", id);
-            List<ViewStatsDto> stats = statsClient.getStats(
-                    event.getCreatedOn().minusSeconds(1),
-                    LocalDateTime.now().plusMinutes(5),
-                    List.of(request.getRequestURI()),
-                    true);
+        List<ViewStatsDto> stats = statsClient.getStats(
+                event.getPublishedOn().minusSeconds(1),
+                LocalDateTime.now().plusSeconds(1),
+                List.of(request.getRequestURI()),
+                true);
 
-            long views = (stats != null && !stats.isEmpty()) ? stats.get(0).getHits() : 0L;
-            dto.setViews(views);
-            log.info("EventId={} views updated to: {}", id, views);
-        } catch (Exception e) {
-            log.warn("Failed to get stats for event id={}: {}", id, e.getMessage());
-            dto.setViews(0L);
-        }
+        long views = (stats != null && !stats.isEmpty()) ? stats.get(0).getHits() : 0L;
+        dto.setViews(views);
 
         return dto;
     }
