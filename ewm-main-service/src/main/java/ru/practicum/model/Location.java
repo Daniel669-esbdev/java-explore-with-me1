@@ -1,6 +1,7 @@
 package ru.practicum.model;
 
 import lombok.*;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
@@ -8,12 +9,12 @@ import javax.persistence.Embeddable;
 @Setter
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Location {
-    private Float lat;
-    private Float lon;
 
-    public Location(Float lat, Float lon) {
-        this.lat = lat;
-        this.lon = lon;
-    }
+    @Column(name = "lat", nullable = false)
+    private Float lat;
+
+    @Column(name = "lon", nullable = false)
+    private Float lon;
 }
