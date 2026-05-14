@@ -43,8 +43,7 @@ public class StatsClient {
         restTemplate.postForLocation("/hit", hitDto);
     }
 
-    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        Map<String, Object> parameters = Map.of(
+    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {        Map<String, Object> parameters = Map.of(
                 "start", start.format(FORMATTER),
                 "end", end.format(FORMATTER),
                 "uris", String.join(",", uris),
