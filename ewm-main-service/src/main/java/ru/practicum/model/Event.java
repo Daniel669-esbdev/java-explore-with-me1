@@ -20,8 +20,6 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private Category category;
 
     @Column(name = "confirmed_requests", nullable = false)
@@ -38,13 +36,9 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "initiator_id", nullable = false)
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private User initiator;
 
     @Embedded
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private Location location;
 
     @Column(nullable = false)
@@ -75,13 +69,13 @@ public class Event {
                  Boolean requestModeration, EventState state, String title, Long views) {
         this.id = id;
         this.annotation = annotation;
-        this.setCategory(category);
+        this.category = category;
         this.confirmedRequests = confirmedRequests;
         this.createdOn = createdOn;
         this.description = description;
         this.eventDate = eventDate;
-        this.setInitiator(initiator);
-        this.setLocation(location);
+        this.initiator = initiator;
+        this.location = location;
         this.paid = paid;
         this.participantLimit = participantLimit;
         this.publishedOn = publishedOn;
@@ -105,30 +99,6 @@ public class Event {
         this.location.setLon(lon);
     }
 
-    public Category getCategory() {
-        return category != null ? new Category(category.getId(), category.getName()) : null;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category != null ? new Category(category.getId(), category.getName()) : null;
-    }
-
-    public User getInitiator() {
-        return initiator != null ? new User(initiator.getId(), initiator.getEmail(), initiator.getName()) : null;
-    }
-
-    public void setInitiator(User initiator) {
-        this.initiator = initiator != null ? new User(initiator.getId(), initiator.getEmail(), initiator.getName()) : null;
-    }
-
-    public Location getLocation() {
-        return location != null ? new Location(location.getLat(), location.getLon()) : null;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location != null ? new Location(location.getLat(), location.getLon()) : null;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -140,17 +110,6 @@ public class Event {
     @Override
     public int hashCode() {
         return getClass().hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "Event{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", state=" + state +
-                ", eventDate=" + eventDate +
-                ", views=" + views +
-                '}';
     }
 
     public static EventBuilder builder() {
@@ -186,7 +145,7 @@ public class Event {
         }
 
         public EventBuilder category(Category category) {
-            this.category = (category == null) ? null : new Category(category.getId(), category.getName());
+            this.category = category;
             return this;
         }
 
@@ -211,12 +170,12 @@ public class Event {
         }
 
         public EventBuilder initiator(User initiator) {
-            this.initiator = (initiator == null) ? null : new User(initiator.getId(), initiator.getEmail(), initiator.getName());
+            this.initiator = initiator;
             return this;
         }
 
         public EventBuilder location(Location location) {
-            this.location = (location == null) ? null : new Location(location.getLat(), location.getLon());
+            this.location = location;
             return this;
         }
 

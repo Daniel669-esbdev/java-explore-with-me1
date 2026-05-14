@@ -45,7 +45,7 @@ public class EventServiceImpl implements EventService {
 
         if (request.getEventDate() != null) {
             if (request.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
-                throw new ConflictException("Дата начала события должна быть не ранее чем за час от даты публикации.");
+                throw new ConflictException("Field: eventDate. Error: должно содержать дату, которая еще не наступила");
             }
             event.setEventDate(request.getEventDate());
         }
@@ -53,13 +53,13 @@ public class EventServiceImpl implements EventService {
         if (request.getStateAction() != null) {
             if (request.getStateAction() == UpdateEventAdminRequest.StateAction.PUBLISH_EVENT) {
                 if (event.getState() != EventState.PENDING) {
-                    throw new ConflictException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
+                    throw new ConflictException("Cannot publish the event because it's not in the right state: " + event.getState());
                 }
                 event.setState(EventState.PUBLISHED);
                 event.setPublishedOn(LocalDateTime.now());
             } else if (request.getStateAction() == UpdateEventAdminRequest.StateAction.REJECT_EVENT) {
                 if (event.getState() == EventState.PUBLISHED) {
-                    throw new ConflictException("Событие можно отклонить, только если оно еще не опубликовано");
+                    throw new ConflictException("Cannot reject the event because it's already published");
                 }
                 event.setState(EventState.CANCELED);
             }
@@ -131,11 +131,17 @@ public class EventServiceImpl implements EventService {
 
         if (Boolean.TRUE.equals(onlyAvailable)) {
             events = events.stream()
-                    .filter(e -> e.getParticipantLimit() == 0 || e.getConfirmedRequests() < e.getParticipantLimit())
+                    .filter(e -> e.getParticipantLimit() == 0 ||
+                            e.getConfirmedRequests() < e.getParticipantLimit())
                     .collect(Collectors.toList());
         }
 
-        statsClient.saveHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
+        try {
+            statsClient.saveHit("ewm-main-service", request.getRequestURI(),
+                    request.getRemoteAddr(), LocalDateTime.now());
+        } catch (Exception e) {
+            log.warn("Failed to save hit to stats service", e);
+        }
 
         return events.stream()
                 .map(eventMapper::toEventShortDto)
@@ -151,7 +157,12 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Event with id=" + id + " was not found");
         }
 
-        statsClient.saveHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
+        try {
+            statsClient.saveHit("ewm-main-service", request.getRequestURI(),
+                    request.getRemoteAddr(), LocalDateTime.now());
+        } catch (Exception e) {
+            log.warn("Failed to save hit", e);
+        }
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
 
@@ -176,7 +187,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto addEventPrivate(Long userId, NewEventDto newEventDto) {
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new BadRequestException("Event date must be at least 2 hours from now");
+            throw new BadRequestException("Field: eventDate. Error: должно содержать дату, которая еще не наступила");
         }
 
         User initiator = userRepository.findById(userId)
@@ -186,7 +197,6 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Category with id=" + newEventDto.getCategory() + " was not found"));
 
         Event event = eventMapper.toEvent(newEventDto);
-
         event.setInitiator(initiator);
         event.setCategory(category);
 
