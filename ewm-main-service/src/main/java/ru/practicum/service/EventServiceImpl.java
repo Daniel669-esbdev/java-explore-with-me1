@@ -202,7 +202,7 @@ public class EventServiceImpl implements EventService {
             log.info("Fetching stats for eventId={}", id);
             List<ViewStatsDto> stats = statsClient.getStats(
                     event.getCreatedOn().minusSeconds(1),
-                    LocalDateTime.now().plusSeconds(5),
+                    LocalDateTime.now().plusMinutes(1),
                     List.of(request.getRequestURI()),
                     true);
 
