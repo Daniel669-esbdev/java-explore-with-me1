@@ -198,10 +198,8 @@ public class EventServiceImpl implements EventService {
         EventFullDto dto = eventMapper.toEventFullDto(event);
 
         try {
-            log.info("Fetching stats for eventId={}", id);
-
-            LocalDateTime start = event.getCreatedOn().minusSeconds(1);
-            LocalDateTime end = LocalDateTime.now().plusSeconds(10);
+            LocalDateTime start = event.getCreatedOn().minusYears(1);
+            LocalDateTime end = LocalDateTime.now().plusSeconds(5);
 
             List<ViewStatsDto> stats = statsClient.getStats(
                     start,
@@ -209,14 +207,16 @@ public class EventServiceImpl implements EventService {
                     List.of(request.getRequestURI()),
                     true);
 
-            long views = (stats != null && !stats.isEmpty()) ? stats.get(0).getHits() : 0L;
-            dto.setViews(views);
-            log.info("EventId={} views updated to: {}, range: [{} - {}]", id, views, start, end);
+            if (stats != null && !stats.isEmpty()) {
+                dto.setViews(stats.get(0).getHits());
+            } else {
+                dto.setViews(0L);
+            }
+            log.info("EventId={} views set to: {}", id, dto.getViews());
         } catch (Exception e) {
             log.warn("Failed to get stats for event id={}: {}", id, e.getMessage());
             dto.setViews(0L);
         }
-
         return dto;
     }
 
