@@ -325,7 +325,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         checkUserExists(userId);
-        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
+
+        eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
 
         return requestRepository.findAllByEventId(eventId).stream()
