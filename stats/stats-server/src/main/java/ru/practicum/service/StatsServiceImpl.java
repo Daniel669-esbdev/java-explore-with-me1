@@ -28,7 +28,7 @@ public class StatsServiceImpl implements StatsService {
                 .ip(hitDto.getIp())
                 .timestamp(LocalDateTime.parse(hitDto.getTimestamp(), FORMATTER))
                 .build();
-        repository.save(hit);
+        repository.saveAndFlush(hit);
     }
 
     @Override
