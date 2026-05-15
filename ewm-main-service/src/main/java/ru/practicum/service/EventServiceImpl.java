@@ -379,7 +379,7 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
 
         try {
-            List<ViewStatsDto> stats = statsClient.getStats(start, LocalDateTime.now().plusMinutes(1), uris, true);
+            List<ViewStatsDto> stats = statsClient.getStats(start, end, uris, true);
 
             if (stats != null && !stats.isEmpty()) {
                 Map<String, Long> viewsMap = stats.stream()
