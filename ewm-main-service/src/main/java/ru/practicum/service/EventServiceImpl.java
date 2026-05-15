@@ -133,11 +133,12 @@ public class EventServiceImpl implements EventService {
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                Boolean onlyAvailable, String sort, int from, int size,
                                                HttpServletRequest request) {
-        log.info("Public search: text={}, categories={}, paid={}, start={}, end={}, onlyAvailable={}, sort={}, from={}, size={}",
-                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+
+        if (rangeStart == null) {
+            rangeStart = LocalDateTime.now();
+        }
 
         if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
-            log.warn("Public search: RangeStart {} is after RangeEnd {}", rangeStart, rangeEnd);
             throw new BadRequestException("RangeStart must be before RangeEnd");
         }
 
@@ -158,17 +159,10 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toList());
         }
 
-        try {
-            log.info("Sending hit to stats: uri={}, ip={}", request.getRequestURI(), request.getRemoteAddr());
-            statsClient.saveHit("ewm-main-service", request.getRequestURI(),
-                    request.getRemoteAddr(), LocalDateTime.now());
-        } catch (Exception e) {
-            log.warn("Failed to save hit to stats service: {}", e.getMessage());
-        }
+        statsClient.saveHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
 
         setViews(events);
 
-        log.info("Public search returned {} events", events.size());
         return events.stream()
                 .map(eventMapper::toEventShortDto)
                 .collect(Collectors.toList());
@@ -180,7 +174,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Event with id=" + id + " was not found"));
 
         if (event.getState() != EventState.PUBLISHED) {
-            throw new NotFoundException("Event with id=" + id + " was not found");
+            throw new NotFoundException("Event must be published");
         }
 
         String uri = request.getRequestURI();
@@ -202,11 +196,7 @@ public class EventServiceImpl implements EventService {
 
             LocalDateTime end = now.plusSeconds(2);
 
-            List<ViewStatsDto> stats = statsClient.getStats(
-                    start,
-                    end,
-                    List.of(uri),
-                    true);
+            List<ViewStatsDto> stats = statsClient.getStats(start, end, List.of(uri), true);
 
             if (stats != null && !stats.isEmpty()) {
                 dto.setViews(stats.get(0).getHits());
