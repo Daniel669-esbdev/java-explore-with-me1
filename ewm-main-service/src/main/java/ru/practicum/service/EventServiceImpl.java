@@ -177,6 +177,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto getEventPublic(Long id, HttpServletRequest request) {
         log.info("Public request for eventId={}", id);
+
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Event id={} not found for public request", id);
@@ -188,9 +189,11 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Event with id=" + id + " was not found");
         }
 
+        LocalDateTime now = LocalDateTime.now();
+
         try {
             statsClient.saveHit("ewm-main-service", request.getRequestURI(),
-                    request.getRemoteAddr(), LocalDateTime.now());
+                    request.getRemoteAddr(), now);
         } catch (Exception e) {
             log.warn("Failed to save hit for eventId={}: {}", id, e.getMessage());
         }
@@ -198,8 +201,8 @@ public class EventServiceImpl implements EventService {
         EventFullDto dto = eventMapper.toEventFullDto(event);
 
         try {
-            LocalDateTime start = event.getCreatedOn().minusYears(1);
-            LocalDateTime end = LocalDateTime.now().plusSeconds(5);
+            LocalDateTime start = event.getCreatedOn().minusSeconds(1);
+            LocalDateTime end = now.plusSeconds(1);
 
             List<ViewStatsDto> stats = statsClient.getStats(
                     start,
@@ -214,9 +217,10 @@ public class EventServiceImpl implements EventService {
             }
             log.info("EventId={} views set to: {}", id, dto.getViews());
         } catch (Exception e) {
-            log.warn("Failed to get stats for event id={}: {}", id, e.getMessage());
+            log.error("Failed to get stats for event id={}: {}", id, e.getMessage());
             dto.setViews(0L);
         }
+
         return dto;
     }
 
