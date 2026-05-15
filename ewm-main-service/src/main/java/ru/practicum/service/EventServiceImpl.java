@@ -159,7 +159,12 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toList());
         }
 
-        statsClient.saveHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
+        try {
+            statsClient.saveHit("ewm-main-service", request.getRequestURI(),
+                    request.getRemoteAddr(), LocalDateTime.now());
+        } catch (Exception e) {
+            log.warn("Failed to save hit to stats service: {}", e.getMessage());
+        }
 
         setViews(events);
 
@@ -174,7 +179,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Event with id=" + id + " was not found"));
 
         if (event.getState() != EventState.PUBLISHED) {
-            throw new NotFoundException("Event must be published");
+            throw new NotFoundException("Event with id=" + id + " was not found");
         }
 
         String uri = request.getRequestURI();
@@ -192,7 +197,7 @@ public class EventServiceImpl implements EventService {
         try {
             LocalDateTime start = event.getPublishedOn() != null ?
                     event.getPublishedOn().minusSeconds(1) :
-                    event.getCreatedOn().minusHours(1);
+                    (event.getCreatedOn() != null ? event.getCreatedOn().minusHours(1) : LocalDateTime.now().minusHours(1));
 
             LocalDateTime end = now.plusSeconds(2);
 
