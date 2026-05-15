@@ -53,18 +53,15 @@ public class StatsClient {
         parameters.put("end", end.format(FORMATTER));
         parameters.put("unique", unique);
 
-        StringBuilder pathBuilder = new StringBuilder("/stats?start={start}&end={end}&unique={unique}");
+        String path = "/stats?start={start}&end={end}&unique={unique}";
 
         if (uris != null && !uris.isEmpty()) {
-            for (int i = 0; i < uris.size(); i++) {
-                String paramName = "uri" + i;
-                pathBuilder.append("&uris={").append(paramName).append("}");
-                parameters.put(paramName, uris.get(i));
-            }
+            parameters.put("uris", uris.toArray());
+            path += "&uris={uris}";
         }
 
         ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
-                pathBuilder.toString(),
+                path,
                 HttpMethod.GET,
                 null,
                 STATS_TYPE_REFERENCE,
