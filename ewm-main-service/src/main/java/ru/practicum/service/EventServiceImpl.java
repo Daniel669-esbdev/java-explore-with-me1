@@ -190,10 +190,10 @@ public class EventServiceImpl implements EventService {
         }
 
         LocalDateTime now = LocalDateTime.now();
+        String uri = request.getRequestURI();
 
         try {
-            statsClient.saveHit("ewm-main-service", request.getRequestURI(),
-                    request.getRemoteAddr(), now);
+            statsClient.saveHit("ewm-main-service", uri, request.getRemoteAddr(), now);
         } catch (Exception e) {
             log.warn("Failed to save hit for eventId={}: {}", id, e.getMessage());
         }
@@ -207,7 +207,7 @@ public class EventServiceImpl implements EventService {
             List<ViewStatsDto> stats = statsClient.getStats(
                     start,
                     end,
-                    List.of(request.getRequestURI()),
+                    List.of(uri),
                     true);
 
             if (stats != null && !stats.isEmpty()) {
