@@ -176,33 +176,31 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventPublic(Long id, HttpServletRequest request) {
-        log.info("Public request for eventId={}", id);
-
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("Event id={} not found for public request", id);
-                    return new NotFoundException("Event with id=" + id + " was not found");
-                });
+                .orElseThrow(() -> new NotFoundException("Event with id=" + id + " was not found"));
 
         if (event.getState() != EventState.PUBLISHED) {
-            log.warn("Event id={} is not published, public access denied", id);
             throw new NotFoundException("Event with id=" + id + " was not found");
         }
 
-        LocalDateTime now = LocalDateTime.now();
         String uri = request.getRequestURI();
+        String ip = request.getRemoteAddr();
+        LocalDateTime now = LocalDateTime.now();
 
         try {
-            statsClient.saveHit("ewm-main-service", uri, request.getRemoteAddr(), now);
+            statsClient.saveHit("ewm-main-service", uri, ip, now);
         } catch (Exception e) {
-            log.warn("Failed to save hit for eventId={}: {}", id, e.getMessage());
+            log.error("Error saving hit: {}", e.getMessage());
         }
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
 
         try {
-            LocalDateTime start = event.getCreatedOn().minusSeconds(1);
-            LocalDateTime end = now.plusSeconds(1);
+            LocalDateTime start = event.getPublishedOn() != null ?
+                    event.getPublishedOn().minusSeconds(1) :
+                    event.getCreatedOn().minusHours(1);
+
+            LocalDateTime end = now.plusSeconds(2);
 
             List<ViewStatsDto> stats = statsClient.getStats(
                     start,
@@ -215,9 +213,8 @@ public class EventServiceImpl implements EventService {
             } else {
                 dto.setViews(0L);
             }
-            log.info("EventId={} views set to: {}", id, dto.getViews());
         } catch (Exception e) {
-            log.error("Failed to get stats for event id={}: {}", id, e.getMessage());
+            log.error("Error getting stats: {}", e.getMessage());
             dto.setViews(0L);
         }
 
@@ -372,7 +369,10 @@ public class EventServiceImpl implements EventService {
         LocalDateTime start = events.stream()
                 .map(Event::getCreatedOn)
                 .min(LocalDateTime::compareTo)
-                .orElse(LocalDateTime.now().minusYears(10));
+                .orElse(LocalDateTime.now().minusYears(10))
+                .minusSeconds(1);
+
+        LocalDateTime end = LocalDateTime.now().plusSeconds(5);
 
         List<String> uris = events.stream()
                 .map(event -> "/events/" + event.getId())
