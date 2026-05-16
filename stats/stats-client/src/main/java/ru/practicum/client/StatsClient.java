@@ -10,8 +10,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStatsDto;
 
@@ -22,7 +23,6 @@ import java.time.format.DateTimeFormatter;
 public class StatsClient {
 
     private final RestTemplate restTemplate;
-    private final String serverUrl;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private static final ParameterizedTypeReference<List<ViewStatsDto>> STATS_TYPE_REFERENCE =
@@ -31,7 +31,6 @@ public class StatsClient {
 
     public StatsClient(@Value("${stats-server.url:http://localhost:9090}") String serverUrl,
                        RestTemplateBuilder builder) {
-        this.serverUrl = serverUrl;
         this.restTemplate = builder
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
                 .build();
@@ -49,10 +48,15 @@ public class StatsClient {
     }
 
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(serverUrl + "/stats")
-                .queryParam("start", start.format(FORMATTER))
-                .queryParam("end", end.format(FORMATTER))
-                .queryParam("unique", unique);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("start", start.format(FORMATTER));
+        parameters.put("end", end.format(FORMATTER));
+        parameters.put("unique", unique);
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/stats")
+                .queryParam("start", "{start}")
+                .queryParam("end", "{end}")
+                .queryParam("unique", "{unique}");
 
         if (uris != null && !uris.isEmpty()) {
             for (String uri : uris) {
@@ -60,13 +64,12 @@ public class StatsClient {
             }
         }
 
-        URI targetUri = builder.build().toUri();
-
         ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
-                targetUri,
+                builder.toUriString(),
                 HttpMethod.GET,
                 null,
-                STATS_TYPE_REFERENCE
+                STATS_TYPE_REFERENCE,
+                parameters
         );
         return response.getBody();
     }
