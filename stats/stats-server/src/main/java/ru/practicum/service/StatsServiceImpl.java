@@ -35,6 +35,10 @@ public class StatsServiceImpl implements StatsService {
     @Override
     @Transactional(readOnly = true)
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+        if (start != null && end != null && start.isAfter(end)) {
+            throw new IllegalArgumentException("Start time must be before end time");
+        }
+
         List<String> validUris = uris == null ? null : uris.stream()
                 .filter(uri -> uri != null && !uri.isBlank())
                 .collect(Collectors.toList());

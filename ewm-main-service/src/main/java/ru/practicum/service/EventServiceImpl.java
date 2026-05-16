@@ -186,18 +186,30 @@ public class EventServiceImpl implements EventService {
         String ip = request.getRemoteAddr();
         LocalDateTime now = LocalDateTime.now();
 
-        statsClient.saveHit("ewm-main-service", uri, ip, now);
+        try {
+            statsClient.saveHit("ewm-main-service", uri, ip, now);
+        } catch (Exception e) {
+            log.error("Error saving hit: {}", e.getMessage());
+        }
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
 
-        LocalDateTime start = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
-        LocalDateTime end = LocalDateTime.now().plusYears(10);
+        try {
+            LocalDateTime start = event.getPublishedOn() != null ?
+                    event.getPublishedOn().minusSeconds(1) :
+                    (event.getCreatedOn() != null ? event.getCreatedOn().minusHours(1) : LocalDateTime.now().minusHours(1));
 
-        List<ViewStatsDto> stats = statsClient.getStats(start, end, List.of(uri), true);
+            LocalDateTime end = now.plusSeconds(5);
 
-        if (stats != null && !stats.isEmpty()) {
-            dto.setViews(stats.get(0).getHits());
-        } else {
+            List<ViewStatsDto> stats = statsClient.getStats(start, end, List.of(uri), true);
+
+            if (stats != null && !stats.isEmpty()) {
+                dto.setViews(stats.get(0).getHits());
+            } else {
+                dto.setViews(0L);
+            }
+        } catch (Exception e) {
+            log.error("Error getting stats: {}", e.getMessage());
             dto.setViews(0L);
         }
 
