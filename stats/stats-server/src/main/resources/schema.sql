@@ -3,5 +3,5 @@ CREATE TABLE IF NOT EXISTS hits (
                                     app VARCHAR(255) NOT NULL,
     uri VARCHAR(255) NOT NULL,
     ip VARCHAR(50) NOT NULL,
-    timestamp TIMESTAMP WITHOUT TIME ZONE NOT NULL
+    hit_timestamp TIMESTAMP WITHOUT TIME ZONE NOT NULL
     );
