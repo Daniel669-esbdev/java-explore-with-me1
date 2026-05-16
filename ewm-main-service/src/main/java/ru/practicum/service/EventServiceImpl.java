@@ -195,11 +195,8 @@ public class EventServiceImpl implements EventService {
         EventFullDto dto = eventMapper.toEventFullDto(event);
 
         try {
-            LocalDateTime start = event.getPublishedOn() != null ?
-                    event.getPublishedOn().minusSeconds(1) :
-                    (event.getCreatedOn() != null ? event.getCreatedOn().minusHours(1) : LocalDateTime.now().minusHours(1));
-
-            LocalDateTime end = now.plusSeconds(5);
+            LocalDateTime start = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
+            LocalDateTime end = LocalDateTime.now().plusYears(10);
 
             List<ViewStatsDto> stats = statsClient.getStats(start, end, List.of(uri), true);
 
