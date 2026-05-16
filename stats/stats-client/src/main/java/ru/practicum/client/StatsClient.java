@@ -8,9 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStatsDto;
@@ -47,24 +46,22 @@ public class StatsClient {
     }
 
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("start", start.format(FORMATTER));
-        parameters.put("end", end.format(FORMATTER));
-        parameters.put("unique", unique);
-
-        String path = "/stats?start={start}&end={end}&unique={unique}";
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("/stats")
+                .queryParam("start", start.format(FORMATTER))
+                .queryParam("end", end.format(FORMATTER))
+                .queryParam("unique", unique);
 
         if (uris != null && !uris.isEmpty()) {
-            parameters.put("uris", uris.toArray());
-            path += "&uris={uris}";
+            for (String uri : uris) {
+                builder.queryParam("uris", uri);
+            }
         }
 
         ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
-                path,
+                builder.build().toUriString(),
                 HttpMethod.GET,
                 null,
-                STATS_TYPE_REFERENCE,
-                parameters
+                STATS_TYPE_REFERENCE
         );
         return response.getBody();
     }
