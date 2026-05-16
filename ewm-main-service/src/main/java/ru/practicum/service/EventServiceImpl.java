@@ -199,7 +199,7 @@ public class EventServiceImpl implements EventService {
                     event.getPublishedOn().minusSeconds(1) :
                     (event.getCreatedOn() != null ? event.getCreatedOn().minusHours(1) : LocalDateTime.now().minusHours(1));
 
-            LocalDateTime end = now.plusSeconds(2);
+            LocalDateTime end = now.plusSeconds(5);
 
             List<ViewStatsDto> stats = statsClient.getStats(start, end, List.of(uri), true);
 
