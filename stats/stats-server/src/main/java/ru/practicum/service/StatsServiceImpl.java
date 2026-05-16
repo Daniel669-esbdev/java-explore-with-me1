@@ -11,10 +11,11 @@ import ru.practicum.repository.StatsRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class StatsServiceImpl implements StatsService {
     private final StatsRepository repository;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -32,11 +33,16 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-        if (uris == null || uris.isEmpty()) {
+        List<String> validUris = uris == null ? null : uris.stream()
+                .filter(uri -> uri != null && !uri.isBlank())
+                .collect(Collectors.toList());
+
+        if (validUris == null || validUris.isEmpty()) {
             return unique ? repository.findUniqueStats(start, end) : repository.findAllStats(start, end);
         } else {
-            return unique ? repository.findUniqueStatsByUris(start, end, uris) : repository.findStatsByUris(start, end, uris);
+            return unique ? repository.findUniqueStatsByUris(start, end, validUris) : repository.findStatsByUris(start, end, validUris);
         }
     }
 }
