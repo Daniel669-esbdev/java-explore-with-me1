@@ -182,7 +182,7 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Event with id=" + id + " was not found");
         }
 
-        String uri = request.getRequestURI();
+        String uri = "/events/" + id;
         String ip = request.getRemoteAddr();
         LocalDateTime now = LocalDateTime.now();
 
