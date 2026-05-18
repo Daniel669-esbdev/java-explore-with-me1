@@ -48,15 +48,10 @@ public class StatsClient {
     }
 
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("start", start.format(FORMATTER));
-        parameters.put("end", end.format(FORMATTER));
-        parameters.put("unique", unique);
-
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/stats")
-                .queryParam("start", "{start}")
-                .queryParam("end", "{end}")
-                .queryParam("unique", "{unique}");
+                .queryParam("start", start.format(FORMATTER))
+                .queryParam("end", end.format(FORMATTER))
+                .queryParam("unique", unique);
 
         if (uris != null && !uris.isEmpty()) {
             for (String uri : uris) {
@@ -64,13 +59,15 @@ public class StatsClient {
             }
         }
 
+        java.net.URI targetUri = builder.build().encode().toUri();
+
         ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
-                builder.toUriString(),
+                targetUri,
                 HttpMethod.GET,
                 null,
-                STATS_TYPE_REFERENCE,
-                parameters
+                STATS_TYPE_REFERENCE
         );
+
         return response.getBody();
     }
 }
