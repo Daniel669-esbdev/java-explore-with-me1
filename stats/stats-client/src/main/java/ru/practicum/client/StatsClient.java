@@ -29,7 +29,7 @@ public class StatsClient {
             new ParameterizedTypeReference<List<ViewStatsDto>>() {
             };
 
-    public StatsClient(@Value("${stats-server.url:http://localhost:9090}") String serverUrl,
+    public StatsClient(@Value("${java-explore-with-me.url:http://localhost:9090}") String serverUrl,
                        RestTemplateBuilder builder) {
         this.restTemplate = builder
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
