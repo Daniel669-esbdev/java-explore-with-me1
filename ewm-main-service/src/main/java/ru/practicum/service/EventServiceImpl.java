@@ -199,12 +199,17 @@ public class EventServiceImpl implements EventService {
                     event.getPublishedOn().minusSeconds(1) :
                     (event.getCreatedOn() != null ? event.getCreatedOn().minusHours(1) : LocalDateTime.now().minusHours(1));
 
-            LocalDateTime end = now.plusSeconds(5);
+            LocalDateTime end = now.plusHours(1);
 
             List<ViewStatsDto> stats = statsClient.getStats(start, end, List.of(uri), true);
 
             if (stats != null && !stats.isEmpty()) {
-                dto.setViews(stats.get(0).getHits());
+                ViewStatsDto currentUriStats = stats.stream()
+                        .filter(s -> s.getUri().equals(uri))
+                        .findFirst()
+                        .orElse(null);
+
+                dto.setViews(currentUriStats != null ? currentUriStats.getHits() : 0L);
             } else {
                 dto.setViews(0L);
             }
@@ -367,7 +372,7 @@ public class EventServiceImpl implements EventService {
                 .orElse(LocalDateTime.now().minusYears(10))
                 .minusSeconds(1);
 
-        LocalDateTime end = LocalDateTime.now().plusSeconds(5);
+        LocalDateTime end = LocalDateTime.now().plusHours(1);
 
         List<String> uris = events.stream()
                 .map(event -> "/events/" + event.getId())
@@ -378,7 +383,11 @@ public class EventServiceImpl implements EventService {
 
             if (stats != null && !stats.isEmpty()) {
                 Map<String, Long> viewsMap = stats.stream()
-                        .collect(Collectors.toMap(ViewStatsDto::getUri, ViewStatsDto::getHits));
+                        .collect(Collectors.toMap(
+                                ViewStatsDto::getUri,
+                                ViewStatsDto::getHits,
+                                (existing, replacement) -> existing
+                        ));
 
                 events.forEach(event -> {
                     String key = "/events/" + event.getId();
