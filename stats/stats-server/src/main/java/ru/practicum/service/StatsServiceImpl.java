@@ -26,12 +26,17 @@ public class StatsServiceImpl implements StatsService {
     @Override
     @Transactional
     public void saveHit(EndpointHitDto hitDto) {
+        log.info("Saving hit: {}", hitDto);
+
+        LocalDateTime timestamp = LocalDateTime.parse(hitDto.getTimestamp(), FORMATTER);
+
         EndpointHit hit = EndpointHit.builder()
                 .app(hitDto.getApp())
                 .uri(hitDto.getUri())
                 .ip(hitDto.getIp())
-                .timestamp(LocalDateTime.parse(hitDto.getTimestamp(), FORMATTER))
+                .timestamp(timestamp)
                 .build();
+
         repository.saveAndFlush(hit);
     }
 
