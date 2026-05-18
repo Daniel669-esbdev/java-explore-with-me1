@@ -43,4 +43,13 @@ public class StatsController {
 
         return statsService.getStats(start, end, uris, unique);
     }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(IllegalArgumentException.class)
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.BAD_REQUEST)
+    public java.util.Map<String, String> handleIllegalArgumentException(final IllegalArgumentException e) {
+        return java.util.Map.of(
+                "error", "Bad Request",
+                "message", e.getMessage()
+        );
+    }
 }
