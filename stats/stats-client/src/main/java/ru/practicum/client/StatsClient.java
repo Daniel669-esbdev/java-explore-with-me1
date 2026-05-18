@@ -7,6 +7,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import java.net.URI;
@@ -53,28 +54,28 @@ public class StatsClient {
     }
 
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        try {
-            String encodedStart = URLEncoder.encode(start.format(FORMATTER), StandardCharsets.UTF_8.toString());
-            String encodedEnd = URLEncoder.encode(end.format(FORMATTER), StandardCharsets.UTF_8.toString());
+        String encodedStart = URLEncoder.encode(start.format(FORMATTER), StandardCharsets.UTF_8);
+        String encodedEnd = URLEncoder.encode(end.format(FORMATTER), StandardCharsets.UTF_8);
 
-            StringBuilder urlBuilder = new StringBuilder(baseUrl);
-            urlBuilder.append("/stats")
-                    .append("?start=").append(encodedStart)
-                    .append("&end=").append(encodedEnd)
-                    .append("&unique=").append(unique);
+        StringBuilder urlBuilder = new StringBuilder(baseUrl);
+        urlBuilder.append("/stats")
+                .append("?start=").append(encodedStart)
+                .append("&end=").append(encodedEnd)
+                .append("&unique=").append(unique);
 
-            if (uris != null && !uris.isEmpty()) {
-                for (String uri : uris) {
-                    String encodedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8.toString());
-                    urlBuilder.append("&uris=").append(encodedUri);
-                }
+        if (uris != null && !uris.isEmpty()) {
+            for (String uri : uris) {
+                String encodedUri = URLEncoder.encode(uri, StandardCharsets.UTF_8);
+                urlBuilder.append("&uris=").append(encodedUri);
             }
+        }
 
-            String finalUrl = urlBuilder.toString();
-            log.info("Sending GET request to stats-server: {}", finalUrl);
+        String finalUrl = urlBuilder.toString();
+        log.info("Sending GET request to stats-server: {}", finalUrl);
 
-            URI targetUri = URI.create(finalUrl);
+        URI targetUri = URI.create(finalUrl);
 
+        try {
             ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
                     targetUri,
                     HttpMethod.GET,
@@ -83,8 +84,8 @@ public class StatsClient {
             );
 
             return response.getBody();
-        } catch (Exception e) {
-            log.error("Failed to execute getStats: {}", e.getMessage());
+        } catch (RestClientException e) {
+            log.error("Failed to execute getStats due to REST error: {}", e.getMessage());
             return new ArrayList<>();
         }
     }
