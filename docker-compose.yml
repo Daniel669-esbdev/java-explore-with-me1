@@ -41,6 +41,8 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
+      - JAVA_EXPLORE_WITH_ME_URL=http://stats-server:9090
+      - JAVA-EXPLORE-WITH-ME_URL=http://stats-server:9090
 
   ewm-db:
     image: postgres:16.1
