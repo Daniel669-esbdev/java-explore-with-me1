@@ -32,7 +32,7 @@ public class CompilationController {
 
     @GetMapping("/{compId}")
     public CompilationDto getCompilation(@PathVariable Long compId) {
-        log.info("GET /compilations/{}", compId);
+        log.info("GET /compilation/{}", compId);
         return compilationService.getCompilation(compId);
     }
 }
