@@ -1,5 +1,6 @@
 package ru.practicum.controller;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +9,7 @@ import ru.practicum.service.RatingService;
 @RestController
 @RequestMapping("/users/{userId}/ratings")
 @RequiredArgsConstructor
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 public class UserRatingController {
 
     private final RatingService ratingService;
