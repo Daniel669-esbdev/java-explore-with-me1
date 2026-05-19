@@ -1,5 +1,6 @@
 package ru.practicum.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 public class RatingServiceImpl implements RatingService {
 
     private final LikeRepository likeRepository;

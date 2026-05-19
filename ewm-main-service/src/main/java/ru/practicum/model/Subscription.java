@@ -1,5 +1,6 @@
 package ru.practicum.model;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class Subscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

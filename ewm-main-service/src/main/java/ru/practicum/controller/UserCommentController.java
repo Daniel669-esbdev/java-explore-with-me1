@@ -7,12 +7,14 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.CommentDto;
 import ru.practicum.dto.NewCommentDto;
 import ru.practicum.service.CommentService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/users/{userId}/comments")
 @RequiredArgsConstructor
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 @Slf4j
 public class UserCommentController {
     private final CommentService commentService;

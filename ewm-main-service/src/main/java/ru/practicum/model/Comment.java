@@ -3,6 +3,7 @@ package ru.practicum.model;
 import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @Entity
 @Table(name = "comments")
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

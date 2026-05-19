@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.UserDto;
 import ru.practicum.service.RatingService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/ratings")
+@RequestMapping("/users/{userId}/ratings")
 @RequiredArgsConstructor
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 public class PublicRatingController {
 
     private final RatingService ratingService;

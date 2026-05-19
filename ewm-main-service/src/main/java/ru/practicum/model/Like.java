@@ -2,6 +2,7 @@ package ru.practicum.model;
 
 import lombok.*;
 import javax.persistence.*;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @Entity
 @Table(name = "ratings")
@@ -10,6 +11,7 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
