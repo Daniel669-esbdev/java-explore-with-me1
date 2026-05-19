@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.dto.NewCategoryDto;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Category;
 import ru.practicum.repository.CategoryRepository;
+import ru.practicum.repository.EventRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository repository;
+    private final EventRepository eventRepository;
 
     @Override
     @Transactional
@@ -42,6 +45,10 @@ public class CategoryServiceImpl implements CategoryService {
             log.error("Category with id={} not found for deletion", catId);
             throw new NotFoundException("Category with id=" + catId + " was not found");
         }
+        if (eventRepository.existsByCategoryId(catId)) {
+            log.error("Category with id={} is not empty and cannot be deleted", catId);
+            throw new ConflictException("The category is not empty");
+        }
         repository.deleteById(catId);
         log.info("Category with id={} deleted", catId);
     }
@@ -55,6 +62,11 @@ public class CategoryServiceImpl implements CategoryService {
                     log.error("Category with id={} not found for update", catId);
                     return new NotFoundException("Category with id=" + catId + " was not found");
                 });
+
+        Category existingCategory = repository.findByName(newCategoryDto.getName());
+        if (existingCategory != null && !existingCategory.getId().equals(catId)) {
+            throw new ConflictException("Category with this name already exists");
+        }
 
         category.setName(newCategoryDto.getName());
         Category updatedCategory = repository.save(category);
