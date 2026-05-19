@@ -19,6 +19,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     boolean existsByCategoryId(Long categoryId);
 
+    List<Event> findAllByStateOrderByViewsDesc(EventState state, Pageable pageable);
+
     @Query("SELECT e FROM Event e " +
             "WHERE (COALESCE(:users, NULL) IS NULL OR e.initiator.id IN :users) " +
             "AND (COALESCE(:states, NULL) IS NULL OR e.state IN :states) " +
@@ -50,4 +52,11 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             Pageable pageable);
 
     Optional<Event> findByIdAndInitiatorId(Long eventId, Long initiatorId);
+
+    List<Event> findAllByInitiatorIdInAndStateAndEventDateAfterOrderByEventDateDesc(
+            List<Long> initiatorIds,
+            EventState state,
+            LocalDateTime dateTime,
+            Pageable pageable
+    );
 }
