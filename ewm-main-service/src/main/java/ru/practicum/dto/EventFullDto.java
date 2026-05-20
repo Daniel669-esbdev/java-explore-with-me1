@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
+@Builder(builderClassName = "EventFullDtoBuilder")
 @NoArgsConstructor
 public class EventFullDto {
     private String annotation;
@@ -19,6 +19,7 @@ public class EventFullDto {
     private Long id;
     private UserShortDto initiator;
     private LocationDto location;
+    private LocationAreaDto locationArea;
     private Boolean paid;
     private Integer participantLimit;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -32,8 +33,8 @@ public class EventFullDto {
 
     public EventFullDto(String annotation, CategoryDto category, Integer confirmedRequests,
                         String description, LocalDateTime eventDate, Long id,
-                        UserShortDto initiator, LocationDto location, Boolean paid,
-                        Integer participantLimit, LocalDateTime publishedOn,
+                        UserShortDto initiator, LocationDto location, LocationAreaDto locationArea,
+                        Boolean paid, Integer participantLimit, LocalDateTime publishedOn,
                         LocalDateTime createdOn, Boolean requestModeration,
                         String state, String title, Long views) {
         this.annotation = annotation;
@@ -44,6 +45,7 @@ public class EventFullDto {
         this.id = id;
         this.initiator = initiator != null ? new UserShortDto(initiator.getId(), initiator.getName()) : null;
         this.location = location != null ? new LocationDto(location.getLat(), location.getLon()) : null;
+        this.locationArea = locationArea;
         this.paid = paid;
         this.participantLimit = participantLimit;
         this.publishedOn = publishedOn;
@@ -79,6 +81,24 @@ public class EventFullDto {
     }
 
     public static class EventFullDtoBuilder {
+        private String annotation;
+        private CategoryDto category;
+        private Integer confirmedRequests;
+        private String description;
+        private LocalDateTime eventDate;
+        private Long id;
+        private UserShortDto initiator;
+        private LocationDto location;
+        private LocationAreaDto locationArea;
+        private Boolean paid;
+        private Integer participantLimit;
+        private LocalDateTime publishedOn;
+        private LocalDateTime createdOn;
+        private Boolean requestModeration;
+        private String state;
+        private String title;
+        private Long views;
+
         public EventFullDtoBuilder category(CategoryDto category) {
             this.category = category != null ? new CategoryDto(category.getId(), category.getName()) : null;
             return this;

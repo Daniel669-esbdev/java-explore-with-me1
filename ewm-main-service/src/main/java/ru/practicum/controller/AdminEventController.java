@@ -32,11 +32,12 @@ public class AdminEventController {
             @RequestParam(required = false) List<Long> categories,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+            @RequestParam(required = false) List<Long> locations,
             @PositiveOrZero @RequestParam(defaultValue = "0") int from,
             @Positive @RequestParam(defaultValue = "10") int size) {
-        log.info("Admin GET events: users={}, states={}, categories={}, rangeStart={}, rangeEnd={}, from={}, size={}",
-                users, states, categories, rangeStart, rangeEnd, from, size);
-        return eventService.getEventsAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+        log.info("Admin GET events: users={}, states={}, categories={}, rangeStart={}, rangeEnd={}, locations={}, from={}, size={}",
+                users, states, categories, rangeStart, rangeEnd, locations, from, size);
+        return eventService.getEventsAdmin(users, states, categories, rangeStart, rangeEnd, locations, from, size);
     }
 
     @PatchMapping("/{eventId}")

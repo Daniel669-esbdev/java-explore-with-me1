@@ -44,6 +44,10 @@ public class Event {
     @Embedded
     private Location location;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_area_id")
+    private LocationArea locationArea;
+
     @Column(nullable = false)
     private Boolean paid = false;
 
@@ -68,8 +72,8 @@ public class Event {
 
     public Event(Long id, String annotation, Category category, Integer confirmedRequests,
                  LocalDateTime createdOn, String description, LocalDateTime eventDate, User initiator,
-                 Location location, Boolean paid, Integer participantLimit, LocalDateTime publishedOn,
-                 Boolean requestModeration, EventState state, String title, Long views) {
+                 Location location, LocationArea locationArea, Boolean paid, Integer participantLimit,
+                 LocalDateTime publishedOn, Boolean requestModeration, EventState state, String title, Long views) {
         this.id = id;
         this.annotation = annotation;
         this.category = category;
@@ -79,6 +83,7 @@ public class Event {
         this.eventDate = eventDate;
         this.initiator = initiator;
         this.location = location;
+        this.locationArea = locationArea;
         this.paid = paid;
         this.participantLimit = participantLimit;
         this.publishedOn = publishedOn;
@@ -129,6 +134,7 @@ public class Event {
         private LocalDateTime eventDate;
         private User initiator;
         private Location location;
+        private LocationArea locationArea;
         private Boolean paid;
         private Integer participantLimit;
         private LocalDateTime publishedOn;
@@ -179,6 +185,11 @@ public class Event {
 
         public EventBuilder location(Location location) {
             this.location = location;
+            return this;
+        }
+
+        public EventBuilder locationArea(LocationArea locationArea) {
+            this.locationArea = locationArea;
             return this;
         }
 
@@ -235,8 +246,8 @@ public class Event {
 
         public Event build() {
             return new Event(id, annotation, category, confirmedRequests, createdOn, description,
-                    eventDate, initiator, location, paid, participantLimit, publishedOn,
-                    requestModeration, state, title, views);
+                    eventDate, initiator, location, locationArea, paid, participantLimit,
+                    publishedOn, requestModeration, state, title, views);
         }
     }
 }

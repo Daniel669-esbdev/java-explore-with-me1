@@ -15,10 +15,7 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.mapper.RequestMapper;
 import ru.practicum.model.*;
-import ru.practicum.repository.CategoryRepository;
-import ru.practicum.repository.EventRepository;
-import ru.practicum.repository.RequestRepository;
-import ru.practicum.repository.UserRepository;
+import ru.practicum.repository.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -39,6 +36,7 @@ public class EventServiceImpl implements EventService {
     private final RequestRepository requestRepository;
     private final StatsClient statsClient;
     private final EventMapper eventMapper;
+    private final LocationAreaRepository locationAreaRepository;
 
     @Override
     @Transactional
@@ -89,6 +87,7 @@ public class EventServiceImpl implements EventService {
         if (request.getLocation() != null) {
             event.setLat(request.getLocation().getLat());
             event.setLon(request.getLocation().getLon());
+            event.setLocationArea(findSuitableLocationArea(request.getLocation().getLat(), request.getLocation().getLon()));
         }
 
         if (request.getAnnotation() != null) event.setAnnotation(request.getAnnotation());
@@ -113,14 +112,21 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventFullDto> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories,
-                                             LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
-        log.info("Admin search for events: users={}, states={}, categories={}, start={}, end={}, from={}, size={}",
-                users, states, categories, rangeStart, rangeEnd, from, size);
+                                             LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                             List<Long> locations, int from, int size) {
+        log.info("Admin search for events: users={}, states={}, categories={}, start={}, end={}, locations={}, from={}, size={}",
+                users, states, categories, rangeStart, rangeEnd, locations, from, size);
         List<EventState> eventStates = states == null ? null :
                 states.stream().map(EventState::valueOf).collect(Collectors.toList());
 
         List<Event> events = eventRepository.findEventsAdmin(users, eventStates, categories, rangeStart, rangeEnd,
                 PageRequest.of(from / size, size));
+
+        if (locations != null && !locations.isEmpty()) {
+            events = events.stream()
+                    .filter(e -> e.getLocationArea() != null && locations.contains(e.getLocationArea().getId()))
+                    .collect(Collectors.toList());
+        }
 
         log.info("Found {} events for admin", events.size());
         return events.stream()
@@ -256,6 +262,10 @@ public class EventServiceImpl implements EventService {
         event.setCreatedOn(LocalDateTime.now());
         event.setState(EventState.PENDING);
 
+        if (event.getLocation() != null) {
+            event.setLocationArea(findSuitableLocationArea(event.getLocation().getLat(), event.getLocation().getLon()));
+        }
+
         Event savedEvent = eventRepository.save(event);
         log.info("User id={} successfully added event id={}", userId, savedEvent.getId());
         return eventMapper.toEventFullDto(savedEvent);
@@ -308,6 +318,7 @@ public class EventServiceImpl implements EventService {
         if (request.getLocation() != null) {
             event.setLat(request.getLocation().getLat());
             event.setLon(request.getLocation().getLon());
+            event.setLocationArea(findSuitableLocationArea(request.getLocation().getLat(), request.getLocation().getLon()));
         }
 
         if (request.getStateAction() != null) {
@@ -485,5 +496,19 @@ public class EventServiceImpl implements EventService {
             log.error("User id={} does not exist", userId);
             throw new NotFoundException("User with id=" + userId + " was not found");
         }
+    }
+
+    private LocationArea findSuitableLocationArea(Float lat, Float lon) {
+        if (lat == null || lon == null) {
+            return null;
+        }
+        return locationAreaRepository.findAll().stream()
+                .filter(area -> {
+                    double distance = Math.sqrt(Math.pow(lat - area.getLocation().getLat(), 2)
+                            + Math.pow(lon - area.getLocation().getLon(), 2));
+                    return distance <= area.getRadius();
+                })
+                .findFirst()
+                .orElse(null);
     }
 }
