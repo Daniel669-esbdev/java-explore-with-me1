@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS events (
     created_on TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     published_on TIMESTAMP WITHOUT TIME ZONE,
     confirmed_requests INTEGER NOT NULL DEFAULT 0,
-    views BIGINT NOT NULL DEFAULT 0
+    views BIGINT NOT NULL DEFAULT 0,
     location_area_id BIGINT,
 
     CONSTRAINT fk_events_to_locations FOREIGN KEY (location_area_id) REFERENCES locations(id) ON DELETE SET NULL
