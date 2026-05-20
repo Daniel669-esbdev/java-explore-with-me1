@@ -2,6 +2,7 @@ package ru.practicum.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.practicum.dto.ViewStatsDto;
 import ru.practicum.model.EndpointHit;
 
@@ -12,29 +13,33 @@ public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
 
     @Query("SELECT new ru.practicum.dto.ViewStatsDto(h.app, h.uri, COUNT(DISTINCT h.ip)) " +
             "FROM EndpointHit h " +
-            "WHERE h.timestamp BETWEEN ?1 AND ?2 " +
+            "WHERE h.timestamp BETWEEN :start AND :end " +
             "GROUP BY h.app, h.uri " +
             "ORDER BY COUNT(DISTINCT h.ip) DESC")
-    List<ViewStatsDto> findUniqueStats(LocalDateTime start, LocalDateTime end);
+    List<ViewStatsDto> findUniqueStats(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     @Query("SELECT new ru.practicum.dto.ViewStatsDto(h.app, h.uri, COUNT(h.ip)) " +
             "FROM EndpointHit h " +
-            "WHERE h.timestamp BETWEEN ?1 AND ?2 " +
+            "WHERE h.timestamp BETWEEN :start AND :end " +
             "GROUP BY h.app, h.uri " +
             "ORDER BY COUNT(h.ip) DESC")
-    List<ViewStatsDto> findAllStats(LocalDateTime start, LocalDateTime end);
+    List<ViewStatsDto> findAllStats(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     @Query("SELECT new ru.practicum.dto.ViewStatsDto(h.app, h.uri, COUNT(DISTINCT h.ip)) " +
             "FROM EndpointHit h " +
-            "WHERE h.timestamp BETWEEN ?1 AND ?2 AND h.uri IN ?3 " +
+            "WHERE h.timestamp BETWEEN :start AND :end AND h.uri IN :uris " +
             "GROUP BY h.app, h.uri " +
             "ORDER BY COUNT(DISTINCT h.ip) DESC")
-    List<ViewStatsDto> findUniqueStatsByUris(LocalDateTime start, LocalDateTime end, List<String> uris);
+    List<ViewStatsDto> findUniqueStatsByUris(@Param("start") LocalDateTime start,
+                                             @Param("end") LocalDateTime end,
+                                             @Param("uris") List<String> uris);
 
     @Query("SELECT new ru.practicum.dto.ViewStatsDto(h.app, h.uri, COUNT(h.ip)) " +
             "FROM EndpointHit h " +
-            "WHERE h.timestamp BETWEEN ?1 AND ?2 AND h.uri IN ?3 " +
+            "WHERE h.timestamp BETWEEN :start AND :end AND h.uri IN :uris " +
             "GROUP BY h.app, h.uri " +
             "ORDER BY COUNT(h.ip) DESC")
-    List<ViewStatsDto> findStatsByUris(LocalDateTime start, LocalDateTime end, List<String> uris);
+    List<ViewStatsDto> findStatsByUris(@Param("start") LocalDateTime start,
+                                       @Param("end") LocalDateTime end,
+                                       @Param("uris") List<String> uris);
 }
