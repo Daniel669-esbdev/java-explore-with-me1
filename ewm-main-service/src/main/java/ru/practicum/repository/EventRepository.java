@@ -33,6 +33,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             @Param("categories") List<Long> categories,
             @Param("rangeStart") LocalDateTime rangeStart,
             @Param("rangeEnd") LocalDateTime rangeEnd,
+            @Param("locations") List<Long> locations,
             Pageable pageable);
 
     @Query("SELECT e FROM Event e " +

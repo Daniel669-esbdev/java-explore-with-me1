@@ -128,7 +128,7 @@ public class EventServiceImpl implements EventService {
         List<EventState> eventStates = states == null ? null :
                 states.stream().map(EventState::valueOf).collect(Collectors.toList());
 
-        List<Event> events = eventRepository.findEventsAdmin(users, eventStates, categories, rangeStart, rangeEnd,
+        List<Event> events = eventRepository.findEventsAdmin(users, eventStates, categories, rangeStart, rangeEnd, locations,
                 PageRequest.of(from / size, size));
 
         log.info("Found {} events for admin", events.size());
