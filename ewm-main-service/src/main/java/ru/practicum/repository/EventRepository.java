@@ -25,6 +25,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "WHERE (COALESCE(:users, NULL) IS NULL OR e.initiator.id IN :users) " +
             "AND (COALESCE(:states, NULL) IS NULL OR e.state IN :states) " +
             "AND (COALESCE(:categories, NULL) IS NULL OR e.category.id IN :categories) " +
+            "AND (COALESCE(:locations, NULL) IS NULL OR e.locationArea.id IN :locations) " +
             "AND (CAST(:rangeStart AS timestamp) IS NULL OR e.eventDate >= :rangeStart) " +
             "AND (CAST(:rangeEnd AS timestamp) IS NULL OR e.eventDate <= :rangeEnd)")
     List<Event> findEventsAdmin(
@@ -42,6 +43,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "OR LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%')))) " +
             "AND (COALESCE(:categories, NULL) IS NULL OR e.category.id IN :categories) " +
             "AND (:paid IS NULL OR e.paid = :paid) " +
+            "AND (COALESCE(:locations, NULL) IS NULL OR e.locationArea.id IN :locations) " +
             "AND (CAST(:rangeStart AS timestamp) IS NULL OR e.eventDate >= :rangeStart) " +
             "AND (CAST(:rangeEnd AS timestamp) IS NULL OR e.eventDate <= :rangeEnd)")
     List<Event> findEventsPublic(
