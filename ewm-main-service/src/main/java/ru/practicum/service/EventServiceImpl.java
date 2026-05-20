@@ -159,7 +159,7 @@ public class EventServiceImpl implements EventService {
 
         Pageable pageable = PageRequest.of(from / size, size, sortOrder);
 
-        List<Event> events = eventRepository.findEventsPublic(text, categoryIds, paid, rangeStart, rangeEnd, pageable);
+        List<Event> events = eventRepository.findEventsPublic(text, categoryIds, paid, rangeStart, rangeEnd, null, pageable);
 
         if (Boolean.TRUE.equals(onlyAvailable)) {
             events = events.stream()
