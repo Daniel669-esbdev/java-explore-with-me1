@@ -17,7 +17,8 @@ public interface EventService {
 
     List<EventFullDto> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories,
                                       LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                      List<Long> locations, int from, int size);
+                                      List<Long> locations,
+                                      int from, int size);
 
     EventFullDto updateEventAdmin(Long eventId, UpdateEventAdminRequest updateRequest);
 

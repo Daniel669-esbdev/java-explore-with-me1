@@ -37,6 +37,7 @@ public class AdminEventController {
             @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Admin GET events: users={}, states={}, categories={}, rangeStart={}, rangeEnd={}, locations={}, from={}, size={}",
                 users, states, categories, rangeStart, rangeEnd, locations, from, size);
+
         return eventService.getEventsAdmin(users, states, categories, rangeStart, rangeEnd, locations, from, size);
     }
 
