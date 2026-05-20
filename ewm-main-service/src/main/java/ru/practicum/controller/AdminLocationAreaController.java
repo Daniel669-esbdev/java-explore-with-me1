@@ -1,5 +1,6 @@
 package ru.practicum.controller;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequestMapping("/admin/locations")
 @RequiredArgsConstructor
 @Validated
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 @Slf4j
 public class AdminLocationAreaController {
 
